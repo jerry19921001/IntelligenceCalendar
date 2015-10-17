@@ -31,16 +31,19 @@ import java.util.HashMap;
 public class MainActivity extends ActionBarActivity {
     private MixEventDAO database=null;
     //final CalendarView calendar= (CalendarView) findViewById(R.id.calendarView);
-    View lastdate;
+    CaldroidFragment caldroidFragment = new CaldroidFragment();
+    Bundle args = new Bundle();
+    //View lastdate, view_today;
     Date lastday=new Date();
     Calendar cal = Calendar.getInstance();
+    Date date_today = new Date();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd");
     SharedPreferences settings = null;
 
     public void shownowevent(Date date)
     {
         TextView DATE=(TextView)findViewById(R.id.DATE);
         database=new MixEventDAO(this);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd");
         Calendar now=Calendar.getInstance();
         now.setTime(date);
         DATE.setText(sdf.format(now.getTime()));
@@ -90,13 +93,26 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void onSelectDate(Date date, View view) {
-            if (lastdate != null)
+
+            if (lastday != null)
             {
-                lastdate.setBackgroundColor(android.graphics.Color.WHITE);
+                caldroidFragment.setBackgroundResourceForDate(R.color.white, lastday);
             }
-            lastdate=view;
+            String s1 = sdf.format(date);
+            String s2 = sdf.format(date_today);
+            if (s1.compareTo(s2) == 0)
+            {
+                System.out.println("IN");
+                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border_new, date);
+            }
+            else
+            {
+                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
+                caldroidFragment.setBackgroundResourceForDate(R.color.green, date);
+
+            }
             lastday=date;
-            view.setBackgroundColor(android.graphics.Color.YELLOW);
+            caldroidFragment.refreshView();
             shownowevent(date);
         }
         @Override
@@ -118,8 +134,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Bundle args = new Bundle();
-        CaldroidFragment caldroidFragment = new CaldroidFragment();
         args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
         args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
         settings = getSharedPreferences("UserSetting", 0);
@@ -201,7 +215,6 @@ public class MainActivity extends ActionBarActivity {
                 Intent goToUserPage=new Intent( MainActivity.this,UserPage.class );
                 startActivity(goToUserPage);
                 Bundle args = new Bundle();
-                CaldroidFragment caldroidFragment = new CaldroidFragment();
                 lastday = cal.getTime();
                 args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
                 args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
