@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:id="@+id/Hour">
+
+    <TextView
+        android:layout_width="20dp"
+        android:layout_height="40dp"
+        android:text=""
+        android:id="@+id/time_slot"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/accent_material_light" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text=""
+        android:id="@+id/hour_event"
+        android:layout_toRightOf="@id/time_slot"
+        android:background="@color/accent_material_dark" />
+</RelativeLayout>

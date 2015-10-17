@@ -1,0 +1,46 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
+    <item android:id="@+id/action_settings" android:title="@string/action_settings"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item
+        android:id="@+id/changeMode"
+        android:title="changeMode">
+
+        <menu>
+            <item
+                android:id="@+id/List"
+                android:title="List">
+
+            </item>
+            <item
+                android:id="@+id/Day_List"
+                android:title="DayList">
+            </item>
+        </menu>
+
+     </item>
+    <item
+        android:id="@+id/New_Event"
+        android:title="NewEvent">
+        <menu>
+            <item
+                android:id="@+id/Fixed"
+                android:title="Fixed">
+
+            </item>
+            <item
+                android:id="@+id/Elastic"
+                android:title="Elastic">
+            </item>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/TestOption"
+        android:title="TestOption">
+    </item>
+    <item
+        android:id="@+id/User"
+        android:title="User">
+    </item>
+</menu>
