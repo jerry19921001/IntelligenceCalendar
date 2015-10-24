@@ -118,10 +118,9 @@ public class MixEventDAO {
         result.close();
     }
     public void InsertStaticEvents(){
-        //System.out.println("in InsertStaticEvents");
         String sql="select * "+
                 " from "+EventsDao.Table_Name+
-                " where "+EventsDao.Col_Is_Static+">0";
+                " where "+EventsDao.Col_Is_Static+">0";//+" and "+EventsDao.Col_Inside_MixEventDAO+"=0";
         Cursor result=database.rawQuery(sql, null);
         if( result.getCount()==0 ){
             result.close();
@@ -136,13 +135,11 @@ public class MixEventDAO {
             temp.setPreviousId(result.getLong(0));
             temp.setDoHours(result.getInt(11));
             temp.setIsStatic(1);
-            //temp.print();
 
             if( Insert( temp )==-1 ) break;
         }
 
         result.close();
-        //System.out.println("out InsertStaticEvent");
     }
     public void Sort(){
         String sql="select * "+
@@ -202,13 +199,11 @@ public class MixEventDAO {
                 int no=0;
                 for (int i=startHour;i<endHour;i++){
                     if( hours[i] ){
-                        System.out.println("i="+i);
                         no=no+1;
                         //record how many hours has been sorted
                         int temp=count;
                         if( i+dynamicEvent.getDoHours()-count+1>=24 ) temp=24;
                         else temp=i+dynamicEvent.getDoHours()-count+1;
-                        System.out.println("temp="+temp);
                         //make sure the next hour can be use
                         for (int j=i;j<temp;j++){
                             //insert some hours of the dynamic event into the mix table
@@ -286,5 +281,22 @@ public class MixEventDAO {
             events.add(temp);
         }
         return events;
+    }
+    public Event getFatherEvent(long preid){ // get the father event of the subtask
+        String sql="select * from "+EventsDao.Table_Name+" where "+EventsDao.Key_Id+"="+preid;
+        Cursor result=database.rawQuery(sql,null);
+        result.moveToFirst();
+
+        int start[]={ result.getInt(2),result.getInt(3),result.getInt(4),result.getInt(5),0 };
+        int end[]={ result.getInt(6),result.getInt(7),result.getInt(8),result.getInt(9),0 };
+        Event fatherEvent=new Event(result.getString(1),start,end);
+        fatherEvent.setId(result.getLong(0));
+        fatherEvent.setDoHours(result.getInt(10));
+        fatherEvent.setIsStatic(result.getInt(11));
+        fatherEvent.setBlocks(result.getInt(12));
+
+        result.close();
+
+        return fatherEvent;
     }
 }
