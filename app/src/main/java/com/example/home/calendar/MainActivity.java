@@ -46,10 +46,9 @@ public class MainActivity extends ActionBarActivity {
         database=new MixEventDAO(this);
         Calendar now=Calendar.getInstance();
         now.setTime(date);
-        DATE.setText(sdf.format(now.getTime()));
         final ArrayList<Event> data=database.getOneDayEvents(now.get(Calendar.YEAR), now.get(Calendar.MONTH) + 1, now.get(Calendar.DAY_OF_MONTH));
         database.Close();
-
+        DATE.setText(sdf.format(now.getTime()) + "    Total Event : " + data.size());
         ListView event;
         event = (ListView)findViewById(R.id.Event);
         ArrayList<HashMap<String, Object>> allevent = new ArrayList<HashMap<String,Object>>();

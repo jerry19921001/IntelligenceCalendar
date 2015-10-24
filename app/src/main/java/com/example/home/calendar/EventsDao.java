@@ -100,13 +100,13 @@ public class EventsDao {
         cv.put(Col_Start_Year,event.getStartYear());
         cv.put(Col_Start_Month,event.getStartMonth());
         cv.put(Col_Start_Day,event.getStartDay());
-        if( event.getStartHour()<originalStart[4] ) cv.put(Col_Start_Hour,event.getStartHour());
-        else cv.put(Col_Start_Hour,originalStart[4]);
+        if( event.getStartHour()<originalStart[3] ) cv.put(Col_Start_Hour,event.getStartHour());
+        else cv.put(Col_Start_Hour,originalStart[3]);
         cv.put(Col_End_Year,event.getEndYear());
         cv.put(Col_End_Month,event.getEndMonth());
         cv.put(Col_End_Day,event.getEndDay());
-        if( event.getEndHour()>originalEnd[4] ) cv.put(Col_End_Hour,event.getEndHour());
-        else cv.put(Col_End_Hour,originalEnd[4]);
+        if( event.getEndHour()>originalEnd[3] ) cv.put(Col_End_Hour,event.getEndHour());
+        else cv.put(Col_End_Hour,originalEnd[3]);
         cv.put(Col_Do_Hour,newDoHour);
         if( event.isStatic() ) cv.put(Col_Is_Static,1);
         else cv.put(Col_Is_Static,0);
@@ -115,7 +115,6 @@ public class EventsDao {
         return db.update(Table_Name,cv,where,null)>0;
     }
     public ArrayList<Event> GetOneDayEvents( int sYear,int sMonth,int sDay ){
-       // System.out.println("in getonedayevent");
         String sql="select * "+
                 " from "+Table_Name+
                 " where "+Col_Start_Year+" = "+sYear+" and "+Col_Start_Month+" = "+sMonth+" and "+ Col_Start_Day+" = "+sDay+

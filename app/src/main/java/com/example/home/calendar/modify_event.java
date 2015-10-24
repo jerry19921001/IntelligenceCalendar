@@ -8,6 +8,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by User205 on 2015/7/23.
  */
@@ -17,6 +20,7 @@ public class modify_event extends commonOperation {
     private long eventID;
     private Event modifyEvent;
     private boolean isStatic=false;
+    private int ori_sYear, ori_sMonth, ori_sDay, ori_sHour, ori_sMinute, ori_eYear, ori_eMonth, ori_eDay, ori_eHour, ori_eMinute;
 
     @Override
     protected void onCreate(Bundle saveInstanceState) {
@@ -46,16 +50,16 @@ public class modify_event extends commonOperation {
 ///////////////////////////////////
         EditText eventName = (EditText) findViewById(R.id.InputName);
         eventName.setText(modifyEvent.getName());
-        sYear = modifyEvent.getStartYear();
-        sMonth = modifyEvent.getStartMonth() - 1;
-        sDay = modifyEvent.getStartDay();
-        sHour = modifyEvent.getStartHour();
-        sMinute = modifyEvent.getStartMinute();
-        eYear = modifyEvent.getEndYear();
-        eMonth = modifyEvent.getEndMonth() - 1;
-        eDay = modifyEvent.getEndDay();
-        eHour = modifyEvent.getEndHour();
-        eMinute = modifyEvent.getEndMinute();
+        ori_sYear=sYear = modifyEvent.getStartYear();
+        ori_sMonth=sMonth = modifyEvent.getStartMonth() - 1;
+        ori_sDay=sDay = modifyEvent.getStartDay();
+        ori_sHour=sHour = modifyEvent.getStartHour();
+        ori_sMinute=sMinute = modifyEvent.getStartMinute();
+        ori_eYear=eYear = modifyEvent.getEndYear();
+        ori_eMonth=eMonth = modifyEvent.getEndMonth() - 1;
+        ori_eDay=eDay = modifyEvent.getEndDay();
+        ori_eHour=eHour = modifyEvent.getEndHour();
+        ori_eMinute=eMinute = modifyEvent.getEndMinute();
 
         updateDisplay();
         selectTime();
@@ -108,8 +112,7 @@ public class modify_event extends commonOperation {
 
         switch (decision.getId()) {
             case R.id.Modify_Button:
-                boolean successOrFail;
-                task.Update(modifyEvent,0);
+                task.Update(modifyEvent,different());
                 subTask.Update(modifyEvent);
                 break;
             case R.id.Delete_Button:
@@ -122,6 +125,23 @@ public class modify_event extends commonOperation {
         task.Close();
         subTask.Close();
         modify_event.this.finish();
+    }
+    private int different(){
+        int result=0;
+        Calendar cal =Calendar.getInstance();
+        cal.set(ori_sYear,ori_sMonth,ori_sDay,ori_sHour,ori_sMinute);
+        Date t1=cal.getTime();
+        cal.set(ori_eYear, ori_eMonth, ori_eDay, ori_eHour, ori_eMinute);
+        Date t2=cal.getTime();
+        long result1=t1.getTime()-t2.getTime();
+        cal.set(sYear,sMonth,sDay,sHour,sMinute);
+        t1=cal.getTime();
+        cal.set(eYear,eMonth,eDay,eHour,eMinute);
+        t2=cal.getTime();
+        long result2=t1.getTime()-t2.getTime();
+        result=(int)((result1-result2)/(1000*3600));
+        return result;
+
     }
 }
 
