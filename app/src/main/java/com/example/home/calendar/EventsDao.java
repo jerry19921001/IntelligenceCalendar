@@ -97,16 +97,22 @@ public class EventsDao {
         ContentValues cv=new ContentValues();
 
         cv.put(Col_Event_Name,event.getName());
-        cv.put(Col_Start_Year,event.getStartYear());
+        cv.put(Col_Start_Year, event.getStartYear());
         cv.put(Col_Start_Month,event.getStartMonth());
         cv.put(Col_Start_Day,event.getStartDay());
-        if( event.getStartHour()<originalStart[3] ) cv.put(Col_Start_Hour,event.getStartHour());
-        else cv.put(Col_Start_Hour,originalStart[3]);
         cv.put(Col_End_Year,event.getEndYear());
         cv.put(Col_End_Month,event.getEndMonth());
         cv.put(Col_End_Day,event.getEndDay());
-        if( event.getEndHour()>originalEnd[3] ) cv.put(Col_End_Hour,event.getEndHour());
-        else cv.put(Col_End_Hour,originalEnd[3]);
+        if(event.isStatic()){// static event
+            cv.put(Col_Start_Hour,event.getStartHour());
+            cv.put(Col_End_Hour,event.getEndHour());
+        }
+        else{// schedulable event
+            if( event.getStartHour()<originalStart[3] ) cv.put(Col_Start_Hour,event.getStartHour());
+            else cv.put(Col_Start_Hour,originalStart[3]);
+            if( event.getEndHour()>originalEnd[3] ) cv.put(Col_End_Hour,event.getEndHour());
+            else cv.put(Col_End_Hour,originalEnd[3]);
+        }
         cv.put(Col_Do_Hour,newDoHour);
         if( event.isStatic() ) cv.put(Col_Is_Static,1);
         else cv.put(Col_Is_Static,0);

@@ -30,10 +30,8 @@ import java.util.HashMap;
 
 public class MainActivity extends ActionBarActivity {
     private MixEventDAO database=null;
-    //final CalendarView calendar= (CalendarView) findViewById(R.id.calendarView);
     CaldroidFragment caldroidFragment = new CaldroidFragment();
     Bundle args = new Bundle();
-    //View lastdate, view_today;
     Date lastday=new Date();
     Calendar cal = Calendar.getInstance();
     Date date_today = new Date();
@@ -167,7 +165,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //caldroidFragment.setArguments(args);
         database=new MixEventDAO(this);
         database.DeleteAll();
         database.InsertStaticEvents();
@@ -201,6 +198,17 @@ public class MainActivity extends ActionBarActivity {
                 Intent get_start_elastic = new Intent(MainActivity.this, new_event_elastic.class);
                 startActivity(get_start_elastic);
                 break;
+            case R.id.Sort_Event:
+                database=new MixEventDAO(this);
+                database.DeleteAll();
+                database.InsertStaticEvents();
+                database.Sort();
+                database.Close();
+                break;
+            case R.id.Today:
+                caldroidFragment.moveToDate(cal.getTime());
+                caldroidFragment.refreshView();
+                break;
             case R.id.Day_List:
                 Intent day_list=new Intent(MainActivity.this, day_list_test.class);
                 Calendar now=Calendar.getInstance();
@@ -218,25 +226,7 @@ public class MainActivity extends ActionBarActivity {
             case R.id.User:
                 Intent goToUserPage=new Intent( MainActivity.this,UserPage.class );
                 startActivity(goToUserPage);
-                Bundle args = new Bundle();
-                lastday = cal.getTime();
-                args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
-                args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
-                settings = getSharedPreferences("UserSetting", 0);
-                if (settings.getInt("StartDayOfWeek", 7) == 1)
-                {
-                    args.putInt(CaldroidFragment.START_DAY_OF_WEEK, CaldroidFragment.MONDAY);
-                }
-                else
-                {
-                    args.putInt(CaldroidFragment.START_DAY_OF_WEEK, CaldroidFragment.SUNDAY);
-                }
-                args.putBoolean(CaldroidFragment.SQUARE_TEXT_VIEW_CELL, false);
-                caldroidFragment.setArguments(args);
-                FragmentTransaction t = getSupportFragmentManager().beginTransaction();
-                t.replace(R.id.calendar1, caldroidFragment);
-                caldroidFragment.setCaldroidListener(listener);
-                t.commit();
+                MainActivity.this.finish();
                 break;
         }
         return super.onOptionsItemSelected(item);

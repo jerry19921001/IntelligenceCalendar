@@ -28,6 +28,18 @@
         android:title="NewEvent">
     </item>
     <item
+        android:id="@+id/Sort_Event"
+        android:icon = "@drawable/icon"
+        app:showAsAction="always"
+        android:title = "SortEvent">
+    </item>
+    <item
+        android:id="@+id/Today"
+        android:icon = "@drawable/home"
+        app:showAsAction="always"
+        android:title = "Today">
+    </item>
+    <item
         android:id="@+id/TestOption"
         android:title="TestOption">
     </item>
