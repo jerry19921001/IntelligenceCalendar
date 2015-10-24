@@ -198,6 +198,10 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(change_to_list);
                 Toast.makeText(getApplicationContext(),"change mode successfully",Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.New_Event:
+                Intent get_start_elastic = new Intent(MainActivity.this, new_event_elastic.class);
+                startActivity(get_start_elastic);
+                break;
             case R.id.Day_List:
                 Intent day_list=new Intent(MainActivity.this, day_list_test.class);
                 Calendar now=Calendar.getInstance();
