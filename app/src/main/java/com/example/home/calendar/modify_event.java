@@ -109,7 +109,7 @@ public class modify_event extends commonOperation {
         switch (decision.getId()) {
             case R.id.Modify_Button:
                 boolean successOrFail;
-                task.Update(modifyEvent);
+                task.Update(modifyEvent,0);
                 subTask.Update(modifyEvent);
                 break;
             case R.id.Delete_Button:

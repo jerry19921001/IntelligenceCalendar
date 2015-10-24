@@ -27,6 +27,7 @@ public class EventsDao {
     public static final String Col_Do_Hour="Do_Hour";// 10 int
     public static final String Col_Is_Static="Is_Static";// 11 int (1:static : 0:dynamic)
     public static final String Col_Blocks="Blocks";// 12 int
+    public static final String Col_Inside_MixEventDAO="Inside";// 13 int (1:inside : 0:not inside)
     // the string of create table
     public static final String Create_Table="Create Table "+Table_Name+" ( "+
             Key_Id+" Integer Primary Key AUTOINCREMENT, "+
@@ -41,7 +42,8 @@ public class EventsDao {
             Col_End_Hour+" Integer Not Null, "+
             Col_Do_Hour+" Integer Not Null, "+
             Col_Is_Static+" Integer Not Null, "+
-            Col_Blocks+" Integer Not Null "+
+            Col_Blocks+" Integer Not Null, "+
+            Col_Inside_MixEventDAO+" Integer Not Null "+
             " ); ";
     // the database
     private SQLiteDatabase db=null;
@@ -70,27 +72,44 @@ public class EventsDao {
         if( event.isStatic() ) cv.put( Col_Is_Static,1 );
         else cv.put( Col_Is_Static,0 );
         cv.put( Col_Blocks,event.getBlocks() );
+        cv.put(Col_Inside_MixEventDAO,0);
 
         long id=db.insert( Table_Name,null,cv );
 
         return id;
     }
-    public boolean Update( Event event ){
+    public boolean Update( Event event,int dif ){
+        System.out.println("in EventsDao.Update:");
+        System.out.println("print the event");
+        event.print();
         String where=Key_Id+"="+event.getPreviousId();
+        String sql="select * from "+Table_Name+" where "+where;
+        Cursor result=db.rawQuery(sql, null);
+        result.moveToFirst();
+        int originalDoHour=result.getInt(10);
+        int originalStart[]={result.getInt(2),result.getInt(3),result.getInt(4),result.getInt(5),0};
+        int originalEnd[]={result.getInt(6),result.getInt(7),result.getInt(8),result.getInt(9),0};
+        result.close();
+        System.out.println("dif=" + dif);
+        System.out.println("originalDoHour=" + originalDoHour);
+        int newDoHour=originalDoHour+dif;
+        System.out.println("newDoHour=" + newDoHour);
         ContentValues cv=new ContentValues();
 
         cv.put(Col_Event_Name,event.getName());
         cv.put(Col_Start_Year,event.getStartYear());
         cv.put(Col_Start_Month,event.getStartMonth());
         cv.put(Col_Start_Day,event.getStartDay());
-        cv.put(Col_Start_Hour,event.getStartHour());
+        if( event.getStartHour()<originalStart[4] ) cv.put(Col_Start_Hour,event.getStartHour());
+        else cv.put(Col_Start_Hour,originalStart[4]);
         cv.put(Col_End_Year,event.getEndYear());
         cv.put(Col_End_Month,event.getEndMonth());
         cv.put(Col_End_Day,event.getEndDay());
-        cv.put(Col_End_Hour,event.getEndHour());
-        cv.put(Col_Do_Hour,event.getDoHours());
-        if( event.isStatic() ) cv.put( Col_Is_Static,1 );
-        else cv.put( Col_Is_Static,0 );
+        if( event.getEndHour()>originalEnd[4] ) cv.put(Col_End_Hour,event.getEndHour());
+        else cv.put(Col_End_Hour,originalEnd[4]);
+        cv.put(Col_Do_Hour,newDoHour);
+        if( event.isStatic() ) cv.put(Col_Is_Static,1);
+        else cv.put(Col_Is_Static,0);
         cv.put(Col_Blocks, event.getBlocks());
 
         return db.update(Table_Name,cv,where,null)>0;
@@ -159,5 +178,11 @@ public class EventsDao {
         e.setBlocks(result.getInt(12));
 
         return e;
+    }
+    public boolean setCol_Inside_MixEventDAO(long id){
+        String where=Key_Id+"="+id;
+        ContentValues cv=new ContentValues();
+        cv.put(Col_Inside_MixEventDAO,1);
+        return db.update(Table_Name,cv,where,null)>0;
     }
 }

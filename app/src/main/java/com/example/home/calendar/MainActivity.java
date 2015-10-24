@@ -76,18 +76,24 @@ public class MainActivity extends ActionBarActivity {
                 allevent.add(map);
             }
         }
-        //System.out.println("done2");
         SimpleAdapter adapter = new SimpleAdapter(this, allevent, R.layout.main_list, new String[]{"line"}, new int[]{R.id.event_list});
         event.setAdapter(adapter);
-        event.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
-                int tt = (int) id;
-                long temp = data.get(tt).getId();
-                Intent modify_event = new Intent(MainActivity.this, modify_event.class);
-                modify_event.putExtra("ID", temp);
-                startActivity(modify_event);
-            }
-        });
+        if (data.isEmpty())
+        {
+            event.setOnItemClickListener(null);
+        }
+        else
+        {
+            event.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
+                    int tt = (int) id;
+                    long temp = data.get(tt).getId();
+                    Intent modify_event = new Intent(MainActivity.this, modify_event.class);
+                    modify_event.putExtra("ID", temp);
+                    startActivity(modify_event);
+                }
+            });
+        }
     }
     final CaldroidListener listener = new CaldroidListener() {
 
@@ -102,7 +108,6 @@ public class MainActivity extends ActionBarActivity {
             String s2 = sdf.format(date_today);
             if (s1.compareTo(s2) == 0)
             {
-                System.out.println("IN");
                 caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border_new, date);
             }
             else
@@ -192,10 +197,6 @@ public class MainActivity extends ActionBarActivity {
                 Intent change_to_list=new Intent(MainActivity.this,list_event.class);
                 startActivity(change_to_list);
                 Toast.makeText(getApplicationContext(),"change mode successfully",Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.Elastic:
-                Intent get_start_elastic=new Intent(MainActivity.this,new_event_elastic.class);
-                startActivity(get_start_elastic);
                 break;
             case R.id.Day_List:
                 Intent day_list=new Intent(MainActivity.this, day_list_test.class);
