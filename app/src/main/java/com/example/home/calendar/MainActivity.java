@@ -5,6 +5,12 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
@@ -37,7 +43,30 @@ public class MainActivity extends ActionBarActivity {
     Date date_today = new Date();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd");
     SharedPreferences settings = null;
+    private Drawable createMarkerIcon(Drawable backgroundImage, String text,
+                                      int width, int height) {
 
+        Bitmap canvasBitmap = Bitmap.createBitmap(width, height,
+                Bitmap.Config.ARGB_8888);
+        // Create a canvas, that will draw on to canvasBitmap.
+        Canvas imageCanvas = new Canvas(canvasBitmap);
+
+        // Set up the paint for use with our Canvas
+        Paint imagePaint = new Paint();
+        imagePaint.setTextAlign(Paint.Align.CENTER);
+        imagePaint.setTextSize(100f);
+
+        // Draw the image to our canvas
+        backgroundImage.draw(imageCanvas);
+
+        // Draw the text on top of our image
+        imageCanvas.drawText(text, width / 2, height - 100, imagePaint);
+
+        // Combine background and text to a LayerDrawable
+        LayerDrawable layerDrawable = new LayerDrawable(
+                new Drawable[]{backgroundImage, new BitmapDrawable(canvasBitmap)});
+        return layerDrawable;
+    }
     public void shownowevent(Date date)
     {
         TextView DATE=(TextView)findViewById(R.id.DATE);
@@ -96,6 +125,7 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void onSelectDate(Date date, View view) {
+            Drawable drawtest = createMarkerIcon(getDrawable(R.drawable.red_border), "Hello", 1000, 1000);
 
             if (lastday != null)
             {
@@ -109,7 +139,8 @@ public class MainActivity extends ActionBarActivity {
             }
             else
             {
-                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
+                //caldroidFragment.setBackgroundResourceForDate(drawtest.hashCode(), date_today);
+                //caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
                 caldroidFragment.setBackgroundResourceForDate(R.color.green, date);
 
             }
