@@ -217,6 +217,10 @@ public class MainActivity extends ActionBarActivity {
                 break;
             case R.id.Today:
                 caldroidFragment.moveToDate(cal.getTime());
+                caldroidFragment.setBackgroundResourceForDate(R.color.white, lastday);
+                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
+                lastday = null;
+                shownowevent(date_today);
                 caldroidFragment.refreshView();
                 break;
             case R.id.Day_List:
