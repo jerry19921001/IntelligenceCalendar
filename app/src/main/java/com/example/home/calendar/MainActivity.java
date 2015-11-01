@@ -36,37 +36,13 @@ import java.util.HashMap;
 
 public class MainActivity extends ActionBarActivity {
     private MixEventDAO database=null;
-    CaldroidFragment caldroidFragment = new CaldroidFragment();
+    CaldroidFragment caldroidFragment = new CaldroidSampleCustomFragment();
     Bundle args = new Bundle();
     Date lastday=new Date();
     Calendar cal = Calendar.getInstance();
     Date date_today = new Date();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd");
     SharedPreferences settings = null;
-    private Drawable createMarkerIcon(Drawable backgroundImage, String text,
-                                      int width, int height) {
-
-        Bitmap canvasBitmap = Bitmap.createBitmap(width, height,
-                Bitmap.Config.ARGB_8888);
-        // Create a canvas, that will draw on to canvasBitmap.
-        Canvas imageCanvas = new Canvas(canvasBitmap);
-
-        // Set up the paint for use with our Canvas
-        Paint imagePaint = new Paint();
-        imagePaint.setTextAlign(Paint.Align.CENTER);
-        imagePaint.setTextSize(100f);
-
-        // Draw the image to our canvas
-        backgroundImage.draw(imageCanvas);
-
-        // Draw the text on top of our image
-        imageCanvas.drawText(text, width / 2, height - 100, imagePaint);
-
-        // Combine background and text to a LayerDrawable
-        LayerDrawable layerDrawable = new LayerDrawable(
-                new Drawable[]{backgroundImage, new BitmapDrawable(canvasBitmap)});
-        return layerDrawable;
-    }
     public void shownowevent(Date date)
     {
         TextView DATE=(TextView)findViewById(R.id.DATE);
@@ -125,8 +101,6 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void onSelectDate(Date date, View view) {
-            Drawable drawtest = createMarkerIcon(getDrawable(R.drawable.red_border), "Hello", 1000, 1000);
-
             if (lastday != null)
             {
                 caldroidFragment.setBackgroundResourceForDate(R.color.white, lastday);
@@ -139,8 +113,7 @@ public class MainActivity extends ActionBarActivity {
             }
             else
             {
-                //caldroidFragment.setBackgroundResourceForDate(drawtest.hashCode(), date_today);
-                //caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
+                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
                 caldroidFragment.setBackgroundResourceForDate(R.color.green, date);
 
             }
@@ -160,6 +133,10 @@ public class MainActivity extends ActionBarActivity {
             day_list.putExtras(data);
             startActivity(day_list);
         }
+        @Override
+        public void onCaldroidViewCreated() {
+            //caldroidFragment.getNewDatesGridAdapter(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
+        }
 
     };
 
@@ -178,7 +155,8 @@ public class MainActivity extends ActionBarActivity {
         {
             args.putInt(CaldroidFragment.START_DAY_OF_WEEK, CaldroidFragment.SUNDAY);
         }
-        args.putBoolean(CaldroidFragment.SQUARE_TEXT_VIEW_CELL, false);
+        args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, true);
+        //args.putBoolean(CaldroidFragment.SQUARE_TEXT_VIEW_CELL, false);
         caldroidFragment.setArguments(args);
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         t.replace(R.id.calendar1, caldroidFragment);
@@ -206,6 +184,7 @@ public class MainActivity extends ActionBarActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        caldroidFragment.refreshView();
         shownowevent(lastday);
     }
     @Override
