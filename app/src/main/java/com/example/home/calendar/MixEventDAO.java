@@ -142,6 +142,7 @@ public class MixEventDAO {
         result.close();
     }
     public void Sort(){
+        int month[]={0,31,28,31,30,31,30,31,31,30,31,30,31};
         String sql="select * "+
                 "from "+EventsDao.Table_Name+
                 " where "+Col_Is_Static+"=0"+
@@ -163,79 +164,71 @@ public class MixEventDAO {
             dynamicEvent.setId(dynamicResult.getLong(0));
             dynamicEvent.setPreviousId(dynamicResult.getLong(0));
             //find which day can put something
+            int remainDoHour=dynamicEvent.getDoHours();
             int startDay=dynamicEvent.getStartDay();
-            int endDay=dynamicEvent.getEndDay();
-
-            while (startDay<=endDay){
-                //setting hours of one day
+            int startMonth=dynamicEvent.getStartMonth();
+            // find which hours and which days can be use
+            while( remainDoHour>0 ){
+                // the 24 hours of one day
                 boolean hours[]=new boolean[24];
-                boolean can=true;
-                for (int i=0;i<24;i++){ // 0~6 sleeping time
-                    if( i<6 ) hours[i]=false;
+                for(int i=0;i<24;i++){
+                    if( i<6 ) hours[i]=false;// 0~6 sleep time
                     else hours[i]=true;
                 }
-                //find events which has been set in the start day of dynamic event
-                String sqlOfStaticEvent="select * "+
-                        "from "+tableName+
-                        " where "+Col_Start_Year+"="+dynamicEvent.getStartYear()+" and "+Col_Start_Month+"="+dynamicEvent.getStartMonth()+" and "+Col_Start_Day+"="+startDay+
-                        " order by "+Col_Start_Hour;
-                Cursor oneDayEventResult=database.rawQuery(sqlOfStaticEvent,null);
-                if( oneDayEventResult.getCount()!=0 ){
-                    while ( oneDayEventResult.moveToNext() ){
-                        for(int i=oneDayEventResult.getInt(5);i<oneDayEventResult.getInt(9);i++){
+                // check the day
+                if( startDay>month[startMonth] ){
+                    startDay=1;
+                    startMonth=startMonth+1;
+                }
+                // find the static events of the day
+                String sqlOfStaticEvent="select * from "+tableName+
+                        " where "+Col_Start_Year+"="+dynamicEvent.getStartYear()+" and "+Col_Start_Month+"="+startMonth+" and "+Col_Start_Day+"="+startDay;
+                Cursor staticResult=database.rawQuery(sqlOfStaticEvent,null);
+                if( staticResult.getCount()!=0 ){
+                    while( staticResult.moveToNext() ){
+                        // set the section of hours to be false
+                        for(int i=staticResult.getInt(5);i<staticResult.getInt(9);i++){
                             hours[i]=false;
                         }
                     }
                 }
-                oneDayEventResult.close();
-                //set the start hour and end hour
-                int startHour,endHour;
+                staticResult.close();
+                // check the start hour nad the start day
+                int startHour=0;
                 if( startDay==dynamicEvent.getStartDay() ) startHour=dynamicEvent.getStartHour();
                 else startHour=6;
-                if( endDay==dynamicEvent.getEndDay() ) endHour=dynamicEvent.getEndHour();
-                else endHour=24;
-                //insert dynamic event into this table
-                int count=0;
-                int no=0;
-                for (int i=startHour;i<endHour;i++){
-                    if( hours[i] ){
-                        no=no+1;
-                        //record how many hours has been sorted
-                        int temp=count;
-                        if( i+dynamicEvent.getDoHours()-count+1>=24 ) temp=24;
-                        else temp=i+dynamicEvent.getDoHours()-count+1;
-                        //make sure the next hour can be use
-                        for (int j=i;j<temp;j++){
-                            //insert some hours of the dynamic event into the mix table
-                            if( !hours[j] || count>=dynamicEvent.getDoHours() ){
-                                //set the information of the dynamic event
-                                int startTime[]={ dynamicEvent.getStartYear(),dynamicEvent.getStartMonth(),dynamicEvent.getStartDay(),i,0 };
-                                int endTime[]={ dynamicEvent.getEndYear(),dynamicEvent.getEndMonth(),dynamicEvent.getEndDay(),j,0 };
-                                Event anEventInsertInMix=new Event(dynamicEvent.getName(),startTime,endTime);
-                                anEventInsertInMix.setId(dynamicEvent.getId());
-                                anEventInsertInMix.setPreviousId(dynamicEvent.getId());
-                                anEventInsertInMix.setDoHours(j-i);
-                                anEventInsertInMix.setNo(no);
-                                //insert the section of dynamic event into mix table
-                                Insert(anEventInsertInMix);
+                // the information to insert new event
+                int useHour=0;
+                // find hours to insert the dynamic event
+                for(int i=startHour;i<24;i=i+1){
+                    if( hours[i] && remainDoHour>0 ){
+                        useHour=useHour+1;
+                        remainDoHour=remainDoHour-1;
+                        hours[i]=false;
+                        int temp=remainDoHour;
+                        // make sure the next hour
+                        for(int j=i+1;j<24;j++){
+                            if( !hours[j] || remainDoHour==0 ){
+                                int startTime[]={ dynamicEvent.getStartYear(),startMonth,startDay,i,0 };
+                                int endTime[]={ dynamicEvent.getStartYear(),startMonth,startDay,j,0 };
+                                Event eventInsertToMix=new Event(dynamicEvent.getName(),startTime,endTime);
+                                eventInsertToMix.setPreviousId(dynamicEvent.getId());
+                                eventInsertToMix.setDoHours(useHour);
+                                Insert(eventInsertToMix);
+                                i=j;
                                 break;
                             }
-                            //check the next hour
                             else{
-                                count++;
                                 hours[j]=false;
-                                can=false;
+                                useHour=useHour+1;
+                                remainDoHour=remainDoHour-1;
                             }
                         }
                     }
-                    if( count==dynamicEvent.getDoHours() ){
-                        can=true;
-                        break;
-                    }
+                    if( remainDoHour==0 ) break;
                 }
-                if( can ) break;
-                //find the next day
-                startDay++;
+                // find the next day
+                startDay=startDay+1;
             }
         }
 

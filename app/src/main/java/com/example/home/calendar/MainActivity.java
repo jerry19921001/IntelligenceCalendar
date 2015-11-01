@@ -155,7 +155,7 @@ public class MainActivity extends ActionBarActivity {
         {
             args.putInt(CaldroidFragment.START_DAY_OF_WEEK, CaldroidFragment.SUNDAY);
         }
-        args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, true);
+        args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, false);
         //args.putBoolean(CaldroidFragment.SQUARE_TEXT_VIEW_CELL, false);
         caldroidFragment.setArguments(args);
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();

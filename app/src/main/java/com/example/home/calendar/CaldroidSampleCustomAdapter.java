@@ -42,6 +42,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 
 		TextView tv1 = (TextView) cellView.findViewById(R.id.tv1);
 		TextView tv2 = (TextView) cellView.findViewById(R.id.tv2);
+		TextView tv3 = (TextView) cellView.findViewById(R.id.tv3);
 
 		tv1.setTextColor(Color.BLACK);
 
@@ -106,8 +107,11 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 		if (data.isEmpty())
 			tv2.setText("NO");
 		else
-			tv2.setText("god");
-
+		{
+			tv2.setText(data.get(0).getName());
+			if (data.size() > 1)
+				tv3.setText(data.get(1).getName());
+		}
 		// Somehow after setBackgroundResource, the padding collapse.
 		// This is to recover the padding
 		cellView.setPadding(leftPadding, topPadding, rightPadding,
