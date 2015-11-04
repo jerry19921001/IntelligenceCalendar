@@ -1,50 +1,105 @@
 package com.example.home.calendar;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.support.v7.app.ActionBarActivity;
+import android.view.View;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by User205 on 2015/4/11.
  */
-public class list_event extends Activity {
-    private ListView lv;
-    EventsDao db=null;
-    ArrayList<Event> Events=new ArrayList<>();
-
+public class list_event extends ActionBarActivity {
+    private ExpandableListAdapter listAdapter;
+    private ExpandableListView expListView;
+    private List<String> listparent;
+    private HashMap<String,List<String>> listChild;
+    private MixEventDAO database;
+    Calendar cal = Calendar.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_event);
-        System.out.println("build db");
-        //OneDayEvents=db.GetOneDayEvents()
-        db=new EventsDao(this);
-        System.out.println("after build db");
-        Events=db.AllEvents();
-        System.out.println("array size="+Events.size());
-        for (int i=0;i<Events.size();i=i+1){
-            System.out.println(Events.get(i).getId()+" "+Events.get(i).getName());
-        }
 
-        lv=(ListView)findViewById(R.id.ListTest);
-        ArrayList<HashMap<String,Object>>list=new ArrayList<HashMap<String,Object>>();
-        System.out.println("in for");
-        for(int i=0;i<Events.size();i+=1){
-            HashMap<String,Object>map=new HashMap<String,Object>();
-            map.put("ItemTitle", Events.get(i).getName());
-            map.put("ItemText",Events.get(i).getStartYear());
-            map.put("ItemText2",Events.get(i).getStartMonth());
-            map.put("ItemText3",Events.get(i).getStartDay());
-            list.add(map);
-        }
-        System.out.println("out for");
-        SimpleAdapter msimpleAdapter=new SimpleAdapter(this,list,R.layout.item,new String[] {"ItemTitle", "ItemText", "ItemText2", "ItemText3"},
-                new int[] {R.id.ItemTitle,R.id.ItemText,R.id.ItemText2,R.id.ItemText3});
-        lv.setAdapter(msimpleAdapter);
+        setTitle("10/25~11/1");
+
+        prepareData();
+
+        expListView=(ExpandableListView)findViewById(R.id.ExpandListView);
+
+        listAdapter = new CusExpandableListAdapter(this,listparent,listChild);
+
+        expListView.setAdapter(listAdapter);
+
+        expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView expandableListView, View view, int groupPosition, int childPosition, long id) {
+                /*int tt = (int) id;
+                long temp = data.get(tt).getId();
+                Intent modify_event = new Intent(list_event.this, modify_event.class);
+                modify_event.putExtra("ID", temp);
+                startActivity(modify_event);*/
+                return false;
+            }
+        });
+
     }
+    private void prepareData(){
+        database = new MixEventDAO(this);
+        listparent=new ArrayList<String>();
+        listChild=new HashMap<String,List<String>>();
 
+        listparent.add("Monday");
+        listparent.add("Tuesday");
+        listparent.add("Wednesday");
+        listparent.add("Thursday");
+        listparent.add("Friday");
+        listparent.add("Saturday");
+        listparent.add("Sunday");
+/*
+        List<String> first=new ArrayList<String>();
+        first.add("第一天事件");
+        first.add("事件一");
+        first.add("事件二");
+
+        List<String> second= new ArrayList<String>();
+        second.add("第二天事件");
+        second.add("事件一");
+        second.add("事件二");
+
+        List<String> third = new ArrayList<String>();
+        third.add("第三天事件");
+        third.add("事件一");
+        third.add("事件二");
+
+        listChild.put(listparent.get(0), first);
+        listChild.put(listparent.get(1), second);
+        listChild.put(listparent.get(2),third);
+*/
+        int weekday=cal.get(Calendar.DAY_OF_WEEK);
+        List<String> event=new ArrayList<String>();
+        for(int i=0;i<7;i+=1){
+            event.clear();
+            final ArrayList<Event> data=database.getOneDayEvents(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1,cal.get(Calendar.DAY_OF_MONTH)-weekday+1+i);
+            if(data.isEmpty()){
+                event.add("No Event");
+                event.add("");
+                event.add("");
+            }
+            else{
+                for(int j=0;j<data.size();j+=1){
+                    event.add(data.get(j).getName());
+                    event.add(data.get(j).getStartHour()+":00");
+                    event.add(data.get(j).getEndHour()+":00");
+                }
+            }
+            listChild.put(listparent.get(i),event);
+        }
+    }
 }
