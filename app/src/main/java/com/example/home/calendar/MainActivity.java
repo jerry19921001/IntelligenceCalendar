@@ -36,7 +36,7 @@ import java.util.HashMap;
 
 public class MainActivity extends ActionBarActivity {
     private MixEventDAO database=null;
-    CaldroidFragment caldroidFragment = new CaldroidSampleCustomFragment();
+    CaldroidSampleCustomFragment caldroidFragment = new CaldroidSampleCustomFragment();
     Bundle args = new Bundle();
     Date lastday=new Date();
     Calendar cal = Calendar.getInstance();
@@ -109,7 +109,9 @@ public class MainActivity extends ActionBarActivity {
             String s2 = sdf.format(date_today);
             if (s1.compareTo(s2) == 0)
             {
-                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border_new, date);
+                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border_new, date_today);
+                //caldroidFragment.setBackgroundResourceForDate(R.color.green, date);
+
             }
             else
             {
@@ -133,11 +135,6 @@ public class MainActivity extends ActionBarActivity {
             day_list.putExtras(data);
             startActivity(day_list);
         }
-        @Override
-        public void onCaldroidViewCreated() {
-            //caldroidFragment.getNewDatesGridAdapter(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
-        }
-
     };
 
     @Override
@@ -155,7 +152,7 @@ public class MainActivity extends ActionBarActivity {
         {
             args.putInt(CaldroidFragment.START_DAY_OF_WEEK, CaldroidFragment.SUNDAY);
         }
-        args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, false);
+        //args.putBoolean(CaldroidFragment.SIX_WEEKS_IN_CALENDAR, false);
         //args.putBoolean(CaldroidFragment.SQUARE_TEXT_VIEW_CELL, false);
         caldroidFragment.setArguments(args);
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
