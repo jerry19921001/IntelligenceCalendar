@@ -49,6 +49,14 @@ public class UserPage extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent RestartMainPage=new Intent( UserPage.this, MainActivity.class );
+        startActivity(RestartMainPage);
+        UserPage.this.finish();
+    }
+
     public void onClick( View view ){
         switch( view.getId() ){
             case R.id.cancel: {
