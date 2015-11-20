@@ -250,9 +250,7 @@ public class MixEventDAO {
         e.setNo(result.getInt(13));
 
         result.close();
-        //System.out.println("in MixEventDAO getOneEvent:");
-        //e.print();
-        //System.out.println("out getOneEvent");
+
         return e;
     }
     public ArrayList<Event> getOneDayEvents(int year,int month,int day){
@@ -274,6 +272,8 @@ public class MixEventDAO {
 
             events.add(temp);
         }
+        result.close();
+        
         return events;
     }
     public Event getFatherEvent(long preid){ // get the father event of the subtask

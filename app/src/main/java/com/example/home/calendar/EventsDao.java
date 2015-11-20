@@ -79,9 +79,6 @@ public class EventsDao {
         return id;
     }
     public boolean Update( Event event,int dif ){
-        System.out.println("in EventsDao.Update:");
-        System.out.println("print the event");
-        event.print();
         String where=Key_Id+"="+event.getPreviousId();
         String sql="select * from "+Table_Name+" where "+where;
         Cursor result=db.rawQuery(sql, null);
@@ -90,10 +87,9 @@ public class EventsDao {
         int originalStart[]={result.getInt(2),result.getInt(3),result.getInt(4),result.getInt(5),0};
         int originalEnd[]={result.getInt(6),result.getInt(7),result.getInt(8),result.getInt(9),0};
         result.close();
-        System.out.println("dif=" + dif);
-        System.out.println("originalDoHour=" + originalDoHour);
+
         int newDoHour=originalDoHour+dif;
-        System.out.println("newDoHour=" + newDoHour);
+
         ContentValues cv=new ContentValues();
 
         cv.put(Col_Event_Name,event.getName());
@@ -181,6 +177,7 @@ public class EventsDao {
         e.setDoHours(result.getInt(10));
         e.setIsStatic(result.getInt(11));
         e.setBlocks(result.getInt(12));
+        result.close();
 
         return e;
     }
