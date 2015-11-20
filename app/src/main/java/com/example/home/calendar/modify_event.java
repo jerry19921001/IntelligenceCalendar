@@ -1,6 +1,7 @@
 package com.example.home.calendar;
 
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -124,6 +125,8 @@ public class modify_event extends commonOperation {
         }
         task.Close();
         subTask.Close();
+        Intent RestartMainPage=new Intent( modify_event.this, MainActivity.class );
+        startActivity(RestartMainPage);
         modify_event.this.finish();
     }
     private int different(){

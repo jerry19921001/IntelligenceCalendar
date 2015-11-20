@@ -45,59 +45,6 @@ public class MainActivity extends ActionBarActivity {
     Date date_today = new Date();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd");
     SharedPreferences settings = null;
-    /*public void shownowevent(Date date)
-    {
-        TextView DATE=(TextView)findViewById(R.id.DATE);
-        Calendar now=Calendar.getInstance();
-        now.setTime(date);
-        final ArrayList<Event> data=database.getOneDayEvents(now.get(Calendar.YEAR), now.get(Calendar.MONTH) + 1, now.get(Calendar.DAY_OF_MONTH));
-        DATE.setText(sdf.format(now.getTime()) + "    Total Event : " + data.size());
-        ListView event;
-        event = (ListView)findViewById(R.id.Event);
-        ArrayList<HashMap<String, Object>> allevent = new ArrayList<HashMap<String,Object>>();
-        if (data.isEmpty())
-        {
-            HashMap <String, Object> map = new HashMap<String, Object>();
-            map.put("line", "No Event");
-            allevent.add(map);
-        }
-        else {
-            for (int i = 0; i < data.size(); i++) {
-                HashMap <String, Object> map = new HashMap<String, Object>();
-                String fixed_or_elastic;
-                if (data.get(i).getDoHours() == 0){
-                    fixed_or_elastic = "! ";
-                }
-                else{
-                    fixed_or_elastic = "  ";
-                }
-                int initialT = data.get(i).getStartHour(), endT = data.get(i).getEndHour();
-                String eventname = data.get(i).getName();
-                String day_event = (initialT < 10 ? "0" : "") + initialT + " : 00 ~ " + (endT < 10 ? "0" : "") + endT + " : 00     " + fixed_or_elastic + eventname;
-                map.put("line", day_event);
-                allevent.add(map);
-            }
-        }
-
-        SimpleAdapter adapter = new SimpleAdapter(this, allevent, R.layout.main_list, new String[]{"line"}, new int[]{R.id.event_list});
-        event.setAdapter(adapter);
-        if (data.isEmpty())
-        {
-            event.setOnItemClickListener(null);
-        }
-        else
-        {
-            event.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
-                    int tt = (int) id;
-                    long temp = data.get(tt).getId();
-                    Intent modify_event = new Intent(MainActivity.this, modify_event.class);
-                    modify_event.putExtra("ID", temp);
-                    startActivity(modify_event);
-                }
-            });
-        }
-    }*/
     public void shownowevent(View view, Date date)
     {
         Calendar now=Calendar.getInstance();
@@ -127,10 +74,8 @@ public class MainActivity extends ActionBarActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, allevent);
         ListPopupWindow popup = new ListPopupWindow(this);
         popup.setWidth(500);
-        System.out.println("OK1");
         popup.setAdapter(adapter);
         popup.setAnchorView(view);
-        System.out.println("OK2");
         if (data.isEmpty())
         {
             popup.setOnItemClickListener(null);
@@ -144,6 +89,7 @@ public class MainActivity extends ActionBarActivity {
                     Intent modify_event = new Intent(MainActivity.this, modify_event.class);
                     modify_event.putExtra("ID", temp);
                     startActivity(modify_event);
+                    MainActivity.this.finish();
                 }
             });
         }
@@ -268,11 +214,14 @@ public class MainActivity extends ActionBarActivity {
                 break;
             case R.id.Today:
                 caldroidFragment.moveToDate(cal.getTime());
-                caldroidFragment.setBackgroundResourceForDate(R.color.white, lastday);
-                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
-                lastday = null;
-                //shownowevent(date_today);
-                caldroidFragment.refreshView();
+                if (lastday != null)
+                {
+                    caldroidFragment.setBackgroundResourceForDate(R.color.white, lastday);
+                    caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
+                    lastday = null;
+                    //shownowevent(date_today);
+                    caldroidFragment.refreshView();
+                }
                 break;
             case R.id.Day_List:
                 Intent day_list=new Intent(MainActivity.this, day_list_test.class);
