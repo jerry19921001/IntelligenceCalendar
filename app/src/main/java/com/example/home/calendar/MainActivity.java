@@ -138,7 +138,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        database = new MixEventDAO(this);
+        //database = new MixEventDAO(this);
         setContentView(R.layout.activity_main);
         args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
         args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
@@ -170,7 +170,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //database=new MixEventDAO(this);
+        database=new MixEventDAO(this);
         database.DeleteAll();
         database.InsertStaticEvents();
         database.Sort();

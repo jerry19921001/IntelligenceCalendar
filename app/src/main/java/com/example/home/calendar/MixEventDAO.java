@@ -270,6 +270,7 @@ public class MixEventDAO {
             temp.setId(result.getLong(0));
             temp.setPreviousId(result.getLong(10));
             temp.setDoHours(result.getInt(11));
+            temp.setIsStatic(result.getInt(12));
 
             events.add(temp);
         }

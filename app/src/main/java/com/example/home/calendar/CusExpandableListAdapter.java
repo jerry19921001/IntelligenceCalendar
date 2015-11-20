@@ -98,7 +98,6 @@ public class CusExpandableListAdapter extends BaseExpandableListAdapter {
         List<String> temp=new ArrayList<String>();
         temp=child_content.get(parent_title.get(groupPosition));
         int childSize=child_content.get(parent_title.get(groupPosition)).size();
-        System.out.println("size:"+childSize);
         Event1.setText(temp.get(0));
         if(childIsEmpty(childSize)) {
             Event2.setText("");

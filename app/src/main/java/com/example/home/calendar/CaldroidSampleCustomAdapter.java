@@ -107,9 +107,19 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 			tv2.setText("NO");
 		else
 		{
+			if (data.get(0).isStatic())
+				tv2.setBackgroundResource(R.color.red);
+			else
+				tv2.setBackgroundResource(R.color.blue);
 			tv2.setText(data.get(0).getName());
 			if (data.size() > 1)
+			{
+				if (data.get(1).isStatic())
+					tv3.setBackgroundResource(R.color.red);
+				else
+					tv3.setBackgroundResource(R.color.blue);
 				tv3.setText(data.get(1).getName());
+			}
 		}
 		// Somehow after setBackgroundResource, the padding collapse.
 		// This is to recover the padding
