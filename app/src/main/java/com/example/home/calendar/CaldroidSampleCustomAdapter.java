@@ -3,6 +3,7 @@ package com.example.home.calendar;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 			HashMap<String, Object> extraData) {
 		super(context, month, year, caldroidData, extraData);
 	}
-	private MixEventDAO database = null;
+	private MixEventDAO database = new MixEventDAO(context);
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater) context
@@ -100,10 +101,8 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 		}
 
 		tv1.setText("" + dateTime.getDay());
-
-		database=new MixEventDAO(context);
 		final ArrayList<Event> data=database.getOneDayEvents(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
-		database.Close();
+		//database.Close();
 		if (data.isEmpty())
 			tv2.setText("NO");
 		else

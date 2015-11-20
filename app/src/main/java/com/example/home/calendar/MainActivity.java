@@ -46,11 +46,9 @@ public class MainActivity extends ActionBarActivity {
     public void shownowevent(Date date)
     {
         TextView DATE=(TextView)findViewById(R.id.DATE);
-        database=new MixEventDAO(this);
         Calendar now=Calendar.getInstance();
         now.setTime(date);
         final ArrayList<Event> data=database.getOneDayEvents(now.get(Calendar.YEAR), now.get(Calendar.MONTH) + 1, now.get(Calendar.DAY_OF_MONTH));
-        database.Close();
         DATE.setText(sdf.format(now.getTime()) + "    Total Event : " + data.size());
         ListView event;
         event = (ListView)findViewById(R.id.Event);
@@ -140,6 +138,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        database = new MixEventDAO(this);
         setContentView(R.layout.activity_main);
         args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
         args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
@@ -171,11 +170,11 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        database=new MixEventDAO(this);
+        //database=new MixEventDAO(this);
         database.DeleteAll();
         database.InsertStaticEvents();
         database.Sort();
-        database.Close();
+        //database.Close();
         try {
             SetNotify();
         } catch (ParseException e) {
@@ -206,11 +205,11 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(get_start_elastic);
                 break;
             case R.id.Sort_Event:
-                database=new MixEventDAO(this);
+                //database=new MixEventDAO(this);
                 database.DeleteAll();
                 database.InsertStaticEvents();
                 database.Sort();
-                database.Close();
+                //database.Close();
                 break;
             case R.id.Today:
                 caldroidFragment.moveToDate(cal.getTime());
@@ -248,9 +247,9 @@ public class MainActivity extends ActionBarActivity {
         int month=c.get( Calendar.MONTH )+1;
         int day=c.get(Calendar.DAY_OF_MONTH);// end
 
-        database=new MixEventDAO(this);// get events of one day
+        //database=new MixEventDAO(this);// get events of one day
         ArrayList<Event> data=database.getOneDayEvents(year, month, day);
-        database.Close();// end
+        //database.Close();// end
 
         for(int i=0;i<data.size();i=i+1){
             int id=i;
