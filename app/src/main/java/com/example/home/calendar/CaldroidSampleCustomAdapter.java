@@ -12,6 +12,8 @@ import android.widget.TextView;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidGridAdapter;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -44,6 +46,7 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 		TextView tv1 = (TextView) cellView.findViewById(R.id.tv1);
 		TextView tv2 = (TextView) cellView.findViewById(R.id.tv2);
 		TextView tv3 = (TextView) cellView.findViewById(R.id.tv3);
+		TextView tv4 = (TextView) cellView.findViewById(R.id.tv4);
 
 		tv1.setTextColor(Color.BLACK);
 
@@ -119,6 +122,14 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 				else
 					tv3.setBackgroundResource(R.color.blue);
 				tv3.setText(data.get(1).getName());
+			}
+			if (data.size() > 2)
+			{
+				if (data.get(2).isStatic())
+					tv4.setBackgroundResource(R.color.red);
+				else
+					tv4.setBackgroundResource(R.color.blue);
+				tv4.setText(data.get(2).getName());
 			}
 		}
 		// Somehow after setBackgroundResource, the padding collapse.
