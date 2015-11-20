@@ -19,6 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListPopupWindow;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -43,7 +45,7 @@ public class MainActivity extends ActionBarActivity {
     Date date_today = new Date();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd");
     SharedPreferences settings = null;
-    public void shownowevent(Date date)
+    /*public void shownowevent(Date date)
     {
         TextView DATE=(TextView)findViewById(R.id.DATE);
         Calendar now=Calendar.getInstance();
@@ -76,6 +78,7 @@ public class MainActivity extends ActionBarActivity {
                 allevent.add(map);
             }
         }
+
         SimpleAdapter adapter = new SimpleAdapter(this, allevent, R.layout.main_list, new String[]{"line"}, new int[]{R.id.event_list});
         event.setAdapter(adapter);
         if (data.isEmpty())
@@ -94,6 +97,57 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
         }
+    }*/
+    public void shownowevent(View view, Date date)
+    {
+        Calendar now=Calendar.getInstance();
+        now.setTime(date);
+        final ArrayList<Event> data=database.getOneDayEvents(now.get(Calendar.YEAR), now.get(Calendar.MONTH) + 1, now.get(Calendar.DAY_OF_MONTH));
+        String[] allevent;
+        if (data.isEmpty())
+        {
+            allevent = new String[1];
+            allevent[0] = "No Event";
+        }
+        else {
+            allevent = new String[data.size()];
+            for (int i = 0; i < data.size(); i++) {
+                String fixed_or_elastic;
+                if (data.get(i).getDoHours() == 0){
+                    fixed_or_elastic = "! ";
+                }
+                else{
+                    fixed_or_elastic = "  ";
+                }
+                int initialT = data.get(i).getStartHour(), endT = data.get(i).getEndHour();
+                String eventname = data.get(i).getName();
+                allevent[i] = (initialT < 10 ? "0" : "") + initialT + " : 00 ~ " + (endT < 10 ? "0" : "") + endT + " : 00     " + fixed_or_elastic + eventname;
+            }
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, allevent);
+        ListPopupWindow popup = new ListPopupWindow(this);
+        popup.setWidth(500);
+        System.out.println("OK1");
+        popup.setAdapter(adapter);
+        popup.setAnchorView(view);
+        System.out.println("OK2");
+        if (data.isEmpty())
+        {
+            popup.setOnItemClickListener(null);
+        }
+        else
+        {
+            popup.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> arg0, View v, int position, long id) {
+                    int tt = (int) id;
+                    long temp = data.get(tt).getId();
+                    Intent modify_event = new Intent(MainActivity.this, modify_event.class);
+                    modify_event.putExtra("ID", temp);
+                    startActivity(modify_event);
+                }
+            });
+        }
+        popup.show();
     }
     final CaldroidListener listener = new CaldroidListener() {
 
@@ -119,7 +173,8 @@ public class MainActivity extends ActionBarActivity {
             }
             lastday=date;
             caldroidFragment.refreshView();
-            shownowevent(date);
+            //shownowevent(date);
+            shownowevent(view, date);
         }
         @Override
         public void onLongClickDate(Date date, View view) {
@@ -181,7 +236,7 @@ public class MainActivity extends ActionBarActivity {
             e.printStackTrace();
         }
         caldroidFragment.refreshView();
-        shownowevent(lastday);
+        //shownowevent(lastday);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -216,7 +271,7 @@ public class MainActivity extends ActionBarActivity {
                 caldroidFragment.setBackgroundResourceForDate(R.color.white, lastday);
                 caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
                 lastday = null;
-                shownowevent(date_today);
+                //shownowevent(date_today);
                 caldroidFragment.refreshView();
                 break;
             case R.id.Day_List:
