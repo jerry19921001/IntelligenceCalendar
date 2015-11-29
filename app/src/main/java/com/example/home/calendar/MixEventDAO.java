@@ -67,7 +67,7 @@ public class MixEventDAO {
         cv.put(Col_End_Month,e.getEndMonth());
         cv.put(Col_End_Day,e.getEndDay());
         cv.put(Col_End_Hour,e.getEndHour());
-        cv.put(Col_Previous_Id_From_EventDAO,e.getId());
+        cv.put(Col_Previous_Id_From_EventDAO,e.getPreviousId());
         cv.put(Col_Do_Hour,e.getDoHours());
         if( e.isStatic() ) cv.put(Col_Is_Static,1);
         else cv.put(Col_Is_Static,0);

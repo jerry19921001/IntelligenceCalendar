@@ -1,6 +1,7 @@
 package com.example.home.calendar;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.GestureDetector;
@@ -28,11 +29,20 @@ public class list_event extends ActionBarActivity{
     Calendar cal = Calendar.getInstance(),FirstDateOfWeek=Calendar.getInstance();
     private int sMonth=0,sDay=0,eMonth=0,eDay=0;
     float downX,downY,upX,upY;
+    SharedPreferences settings = null;
+    boolean Sun_T_Mon_F=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_event);
+
+        settings = getSharedPreferences("UserSetting", 0);
+        if(settings.getInt("StartDayOfWeek",7)==1){
+            Sun_T_Mon_F=false;
+        }
+
+        AddWeek=0;
         cal.add(Calendar.DAY_OF_YEAR, AddWeek);
         FirstDateOfWeek.add(Calendar.DAY_OF_YEAR, AddWeek);
         DataInitial();
@@ -104,29 +114,44 @@ public class list_event extends ActionBarActivity{
         return super.onTouchEvent(event);
     }
 
-    private void DataInitial(){
-
-        int dayOfWeek=cal.get(Calendar.DAY_OF_WEEK);
-        cal.add(Calendar.DAY_OF_MONTH, -dayOfWeek + 1 + 1);//加原本的1 加上因為起始暫定為星期一  所以多加1
+    private void DataInitial() {
+        int addDay=1;
+        int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+        System.out.println("Date:" + cal.get(Calendar.DAY_OF_MONTH) + " DoW:" + dayOfWeek);
+        if(!Sun_T_Mon_F){
+            if(dayOfWeek==1){//因為只有禮拜日會被設成1  所以多加6才符合原本想法
+                dayOfWeek += 6;
+            }
+        }
+        cal.add(Calendar.DAY_OF_MONTH, -dayOfWeek + 1 +addDay);//加原本的1 加上因為起始暫定為星期一  所以多加1
         FirstDateOfWeek.setTime(cal.getTime());
         sMonth=cal.get(Calendar.MONTH)+1;
         sDay=cal.get(Calendar.DAY_OF_MONTH);
         cal.add(Calendar.DAY_OF_MONTH, 6);
-        eMonth=cal.get(Calendar.MONTH)+1;
+        eMonth = cal.get(Calendar.MONTH)+1;
         eDay=cal.get(Calendar.DAY_OF_MONTH);
+
+
+
     }
     private void prepareData() {
         database = new MixEventDAO(this);
         listparent = new ArrayList<String>();
         listChild = new HashMap<String, List<String>>();
 
+        if(Sun_T_Mon_F){
+            listparent.add("Sunday");
+        }
         listparent.add("Monday");
         listparent.add("Tuesday");
         listparent.add("Wednesday");
         listparent.add("Thursday");
         listparent.add("Friday");
         listparent.add("Saturday");
-        listparent.add("Sunday");
+        if(!Sun_T_Mon_F){
+            listparent.add("Sunday");
+        }
+
         Calendar calen=Calendar.getInstance();
         calen.setTime(FirstDateOfWeek.getTime());
         ArrayList<Event> data;
