@@ -104,6 +104,9 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 		}
 
 		tv1.setText("" + dateTime.getDay());
+		tv2.setBackgroundResource(R.color.white);
+		tv3.setBackgroundResource(R.color.white);
+		tv4.setBackgroundResource(R.color.white);
 		final ArrayList<Event> data=database.getOneDayEvents(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
 		//database.Close();
 		if (data.isEmpty())

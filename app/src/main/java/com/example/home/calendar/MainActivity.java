@@ -75,7 +75,7 @@ public class MainActivity extends ActionBarActivity {
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, allevent);
         ListPopupWindow popup = new ListPopupWindow(this);
-        popup.setWidth(metrics.widthPixels-200);
+        popup.setWidth(metrics.widthPixels-100);
         popup.setAdapter(adapter);
         popup.setAnchorView(view);
         if (data.isEmpty())
