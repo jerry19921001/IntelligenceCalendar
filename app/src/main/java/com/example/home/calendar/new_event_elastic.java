@@ -93,9 +93,8 @@ public class new_event_elastic extends commonOperation {
                 event.setIsStatic(0);
             }
             else {
-                System.out.println("new_event:" + sYear + " " + sMonth + " " + sDay + " " + sHour);
                 int fixDoHours=calculateFixDoHours(start, end);
-                event.setDoHours(fixDoHours);//待修改
+                event.setDoHours(fixDoHours);
                 event.setIsStatic(1);
             }
             if (EventDb.Insert(event) == -1) {

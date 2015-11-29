@@ -100,6 +100,13 @@ public class modify_event extends commonOperation {
         endSpinner = (Spinner) findViewById(R.id.GetEndTime);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent RestartMainPage=new Intent( modify_event.this, MainActivity.class );
+        startActivity(RestartMainPage);
+        modify_event.this.finish();
+    }
     public void modifyEvent(View decision) {
         EditText name = (EditText) findViewById(R.id.InputName);
         int start[] = {sYear, sMonth + 1, sDay, sHour, sMinute};

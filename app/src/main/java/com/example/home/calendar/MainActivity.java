@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,6 +46,7 @@ public class MainActivity extends ActionBarActivity {
     Date date_today = new Date();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd");
     SharedPreferences settings = null;
+    DisplayMetrics metrics = new DisplayMetrics();
     public void shownowevent(View view, Date date)
     {
         Calendar now=Calendar.getInstance();
@@ -73,7 +75,7 @@ public class MainActivity extends ActionBarActivity {
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, allevent);
         ListPopupWindow popup = new ListPopupWindow(this);
-        popup.setWidth(500);
+        popup.setWidth(metrics.widthPixels-200);
         popup.setAdapter(adapter);
         popup.setAnchorView(view);
         if (data.isEmpty())
@@ -141,6 +143,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         //database = new MixEventDAO(this);
         setContentView(R.layout.activity_main);
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
         args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
         args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
         settings = getSharedPreferences("UserSetting", 0);
@@ -263,7 +266,7 @@ public class MainActivity extends ActionBarActivity {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH");
             int temp=e.getStartHour()-1;
             String start=e.getStartYear()+"/"+e.getStartMonth()+"/"+e.getStartDay()+" "+temp;
-            System.out.println(start);
+            //System.out.println(start);
             Date dt=sdf.parse(start);
             long dttime=dt.getTime();
 
