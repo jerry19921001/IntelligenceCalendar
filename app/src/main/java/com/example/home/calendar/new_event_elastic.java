@@ -28,24 +28,46 @@ public class new_event_elastic extends commonOperation {
     private CheckBox isElastic;
     private EditText time;
     boolean checked=true;
-
+    boolean getIntent=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_event_elastic);
+        int BundleYear=getIntent().getIntExtra("Year",-1),
+        BundleMonth=getIntent().getIntExtra("Month",-1),
+        BundleDay=getIntent().getIntExtra("Day",-1);
+        if(BundleYear!=-1&&BundleMonth!=-1&&BundleDay!=-1){
+            getIntent=true;
+        }
         findViews();
         final Calendar c = Calendar.getInstance();
-        sYear = c.get(Calendar.YEAR);
-        sMonth = c.get(Calendar.MONTH);
-        sDay = c.get(Calendar.DAY_OF_MONTH);
-        sHour = c.get(Calendar.HOUR);
-        sMinute = 0;
-        eYear = c.get(Calendar.YEAR);
-        eMonth = c.get(Calendar.MONTH);
-        eDay = c.get(Calendar.DAY_OF_MONTH);
-        eHour = c.get(Calendar.HOUR);
-        eMinute = 0;
-        spendtime = 0;
+        if(!getIntent){
+            sYear = c.get(Calendar.YEAR);
+            sMonth = c.get(Calendar.MONTH);
+            sDay = c.get(Calendar.DAY_OF_MONTH);
+            sHour = c.get(Calendar.HOUR);
+            sMinute = 0;
+            eYear = c.get(Calendar.YEAR);
+            eMonth = c.get(Calendar.MONTH);
+            eDay = c.get(Calendar.DAY_OF_MONTH);
+            eHour = c.get(Calendar.HOUR);
+            eMinute = 0;
+            spendtime = 0;
+        }
+        else {
+            sYear = BundleYear;
+            sMonth = BundleMonth;
+            sDay = BundleDay;
+            sHour = c.get(Calendar.HOUR);
+            sMinute = 0;
+            eYear = BundleYear;
+            eMonth = BundleMonth;
+            eDay = BundleDay;
+            eHour = c.get(Calendar.HOUR);
+            eMinute = 0;
+            spendtime = 0;
+        }
+
         EventDb=new EventsDao(this);
         updateDisplay();
         selectTime();

@@ -42,15 +42,15 @@ public abstract class commonOperation extends ActionBarActivity {
         showStartDate.setText(sDate);
         StringBuilder eDate = new StringBuilder().append(eYear).append("-").append(extendToTwoDigit(eMonth+1)).append("-").append(extendToTwoDigit(eDay));
         showEndDate.setText(eDate);
-        StringBuilder sTime = new StringBuilder().append(extendToTwoDigit(sHour)).append(":00");
-        showStartTime.setText(sTime);
-        StringBuilder eTime = new StringBuilder().append(extendToTwoDigit(eHour)).append(":00");
-        showEndTime.setText(eTime);
+        //StringBuilder sTime = new StringBuilder().append(extendToTwoDigit(sHour)).append(":00");
+        showStartTime.setText("Start Time");
+        //StringBuilder eTime = new StringBuilder().append(extendToTwoDigit(eHour)).append(":00");
+        showEndTime.setText("End Time");
     }
     public void selectTime(){
         String data[] = new String[24];//set Spinner's data
         for(int i=0;i<24;i+=1){
-            data[i]=i+"";
+            data[i]=i+":00";
         }
         ArrayAdapter<String> item=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,data);//new String[]{"1","2","3"}
         item.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -58,7 +58,7 @@ public abstract class commonOperation extends ActionBarActivity {
         endSpinner.setAdapter(item);
         startSpinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
             public void onItemSelected(AdapterView adapterview, View view, int position, long id) {
-                startHour = startSpinner.getSelectedItem().toString();
+                startHour = startSpinner.getSelectedItem().toString().replace(":00","");
                 sHour = Integer.valueOf(startHour);
                 if (eHour <= sHour) {
                     endSpinner.setSelection(startSpinner.getSelectedItemPosition() + 1);
@@ -78,7 +78,7 @@ public abstract class commonOperation extends ActionBarActivity {
                 val=(TextView)findViewById(R.id.getSelected);
                 String tex=sp.getSelectedItem().toString();
                 val.setText(tex);*/
-                endHour = endSpinner.getSelectedItem().toString();
+                endHour = endSpinner.getSelectedItem().toString().replace(":00","");
                 eHour = Integer.valueOf(endHour);
                 updateDisplay();
             }

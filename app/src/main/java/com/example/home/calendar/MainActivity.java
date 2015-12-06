@@ -47,6 +47,8 @@ public class MainActivity extends ActionBarActivity {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd");
     SharedPreferences settings = null;
     DisplayMetrics metrics = new DisplayMetrics();
+    View lastview = null;
+    boolean lastview_click = false;
     public void shownowevent(View view, Date date)
     {
         Calendar now=Calendar.getInstance();
@@ -74,7 +76,7 @@ public class MainActivity extends ActionBarActivity {
             }
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, allevent);
-        ListPopupWindow popup = new ListPopupWindow(this);
+        final ListPopupWindow popup = new ListPopupWindow(this);
         popup.setWidth(metrics.widthPixels-100);
         popup.setAdapter(adapter);
         popup.setAnchorView(view);
@@ -91,11 +93,18 @@ public class MainActivity extends ActionBarActivity {
                     Intent modify_event = new Intent(MainActivity.this, modify_event.class);
                     modify_event.putExtra("ID", temp);
                     startActivity(modify_event);
-                    MainActivity.this.finish();
+                    popup.dismiss();
+                    lastview = null;
+                    lastview_click = false;
+                    //MainActivity.this.finish();
                 }
             });
         }
         popup.show();
+        if (lastview == view && lastview_click)
+        {
+            popup.dismiss();
+        }
     }
     final CaldroidListener listener = new CaldroidListener() {
 
@@ -119,10 +128,19 @@ public class MainActivity extends ActionBarActivity {
                 caldroidFragment.setBackgroundResourceForDate(R.color.green, date);
 
             }
-            lastday=date;
             caldroidFragment.refreshView();
             //shownowevent(date);
             shownowevent(view, date);
+            lastday = date;
+            if (lastview == view)
+            {
+                lastview_click = !lastview_click;
+            }
+            else
+            {
+                lastview = view;
+                lastview_click = true;
+            }
         }
         @Override
         public void onLongClickDate(Date date, View view) {
@@ -206,6 +224,13 @@ public class MainActivity extends ActionBarActivity {
                 break;
             case R.id.New_Event:
                 Intent get_start_elastic = new Intent(MainActivity.this, new_event_elastic.class);
+                Bundle today = new Bundle();
+                Calendar choose = Calendar.getInstance();
+                choose.setTime(lastday);
+                today.putInt("Year", choose.get(Calendar.YEAR));
+                today.putInt("Month", choose.get(Calendar.MONTH));
+                today.putInt("Day", choose.get(Calendar.DAY_OF_MONTH));
+                get_start_elastic.putExtras(today);
                 startActivity(get_start_elastic);
                 break;
             case R.id.Sort_Event:
@@ -244,6 +269,8 @@ public class MainActivity extends ActionBarActivity {
                 Intent goToUserPage=new Intent( MainActivity.this,UserPage.class );
                 startActivity(goToUserPage);
                 MainActivity.this.finish();
+                lastview = null;
+                lastview_click = false;
                 break;
         }
         return super.onOptionsItemSelected(item);

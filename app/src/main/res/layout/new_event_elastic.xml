@@ -47,17 +47,17 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/startdate" />
 
-            <Spinner
-                android:layout_width="100dp"
-                android:layout_height="fill_parent"
-                android:id="@+id/start_time"
-                android:spinnerMode="dropdown" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/starttime" />
+
+            <Spinner
+                android:layout_width="100dp"
+                android:layout_height="fill_parent"
+                android:id="@+id/start_time"
+                android:spinnerMode="dropdown" />
 
             <Button
                 android:layout_width="wrap_content"
@@ -71,17 +71,17 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/enddate" />
 
-            <Spinner
-                android:layout_width="100dp"
-                android:layout_height="fill_parent"
-                android:id="@+id/end_time"
-                android:spinnerMode="dropdown" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/endtime" />
+
+            <Spinner
+                android:layout_width="100dp"
+                android:layout_height="fill_parent"
+                android:id="@+id/end_time"
+                android:spinnerMode="dropdown" />
 
             <TextView
                 android:layout_width="wrap_content"

@@ -100,13 +100,13 @@ public class modify_event extends commonOperation {
         endSpinner = (Spinner) findViewById(R.id.GetEndTime);
     }
 
-    @Override
-    public void onBackPressed() {
+    //@Override
+    /*public void onBackPressed() {
         super.onBackPressed();
         Intent RestartMainPage=new Intent( modify_event.this, MainActivity.class );
         startActivity(RestartMainPage);
         modify_event.this.finish();
-    }
+    }*/
     public void modifyEvent(View decision) {
         EditText name = (EditText) findViewById(R.id.InputName);
         int start[] = {sYear, sMonth + 1, sDay, sHour, sMinute};
@@ -130,10 +130,8 @@ public class modify_event extends commonOperation {
             default://Cancel_Button
                 break;
         }
-        task.Close();
-        subTask.Close();
-        Intent RestartMainPage=new Intent( modify_event.this, MainActivity.class );
-        startActivity(RestartMainPage);
+        //Intent RestartMainPage=new Intent( modify_event.this, MainActivity.class );
+        //startActivity(RestartMainPage);
         modify_event.this.finish();
     }
     private int different(){

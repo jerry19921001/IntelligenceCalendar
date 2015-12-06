@@ -5,4 +5,6 @@
     <color name = "green"> #FF00FF00 </color>
     <color name = "white"> #FFFFFFFF </color>
     <color name = "empty"> #00000000 </color>
+    <color name = "light_blue"> #FF00FFFF </color>
+    <color name = "pink"> #FFFF00FF </color>
 </resources>
