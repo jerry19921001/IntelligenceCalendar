@@ -1,5 +1,6 @@
 package com.example.home.calendar;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -13,6 +14,8 @@ import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Calendar;
 
 
 /**
@@ -36,6 +39,15 @@ public abstract class commonOperation extends ActionBarActivity {
         else
             return "0" + String.valueOf(number);
     }
+    public boolean errorTimeDetection(){
+        Calendar startCalendar=Calendar.getInstance(),endCalendar=Calendar.getInstance();
+        startCalendar.set(sYear,sMonth,sDay,sHour,sMinute);
+        endCalendar.set(eYear,eMonth,eDay,eHour,eMinute);
+        if(!startCalendar.before(endCalendar)){
+            return false;
+        }
+        return true;
+    }
     protected static void updateDisplay() {
 
         StringBuilder sDate = new StringBuilder().append(sYear).append("-").append(extendToTwoDigit(sMonth + 1)).append("-").append(extendToTwoDigit(sDay));
@@ -43,9 +55,9 @@ public abstract class commonOperation extends ActionBarActivity {
         StringBuilder eDate = new StringBuilder().append(eYear).append("-").append(extendToTwoDigit(eMonth+1)).append("-").append(extendToTwoDigit(eDay));
         showEndDate.setText(eDate);
         //StringBuilder sTime = new StringBuilder().append(extendToTwoDigit(sHour)).append(":00");
-        showStartTime.setText("Start Time");
+        showStartTime.setText("Start Hour");
         //StringBuilder eTime = new StringBuilder().append(extendToTwoDigit(eHour)).append(":00");
-        showEndTime.setText("End Time");
+        showEndTime.setText("End Hour");
     }
     public void selectTime(){
         String data[] = new String[24];//set Spinner's data
@@ -56,18 +68,39 @@ public abstract class commonOperation extends ActionBarActivity {
         item.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         startSpinner.setAdapter(item);
         endSpinner.setAdapter(item);
+        startSpinner.setSelection(sHour);
+        endSpinner.setSelection(eHour);
         startSpinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
             public void onItemSelected(AdapterView adapterview, View view, int position, long id) {
-                startHour = startSpinner.getSelectedItem().toString().replace(":00","");
+                startHour = startSpinner.getSelectedItem().toString().replace(":00", "");
+                int original_sHour=sHour;
                 sHour = Integer.valueOf(startHour);
+                /*if(!errorTimeDetection()){
+                    sHour=original_sHour;
+                    Toast.makeText(getApplicationContext(),"Start Hour can not be exceed by End Hour",Toast.LENGTH_SHORT).show();
+                    startSpinner.setSelection(sHour);
+                }*/
                 if (eHour <= sHour) {
-                    endSpinner.setSelection(startSpinner.getSelectedItemPosition() + 1);
+                    if (sHour == 23)
+                    {
+                        Calendar temp=Calendar.getInstance();
+                        temp.set(eYear,eMonth,eDay);
+                        temp.add(Calendar.DAY_OF_YEAR, 1);
+                        eYear=temp.get(Calendar.YEAR);
+                        eMonth=temp.get(Calendar.MONTH);
+                        eDay=temp.get(Calendar.DAY_OF_MONTH);
+                        eHour = 0;
+                        endSpinner.setSelection(eHour);
+                    }
+                    else
+                    {
+                        endSpinner.setSelection(startSpinner.getSelectedItemPosition() + 1);
+                    }
                 }
                 updateDisplay();
             }
 
             public void onNothingSelected(AdapterView adapterview) {
-                Toast.makeText(commonOperation.this, "XXXXXX", Toast.LENGTH_LONG).show();
             }
         });
         endSpinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
@@ -78,14 +111,20 @@ public abstract class commonOperation extends ActionBarActivity {
                 val=(TextView)findViewById(R.id.getSelected);
                 String tex=sp.getSelectedItem().toString();
                 val.setText(tex);*/
-                endHour = endSpinner.getSelectedItem().toString().replace(":00","");
+                System.out.println(sHour + " " + eHour);
+                endHour = endSpinner.getSelectedItem().toString().replace(":00", "");
+                int original_eHour=eHour;
                 eHour = Integer.valueOf(endHour);
+                if(!errorTimeDetection()){
+                    eHour=original_eHour;
+                    Toast.makeText(getApplicationContext(),"End Hour can not exceed Start Hour",Toast.LENGTH_SHORT).show();
+                    endSpinner.setSelection(eHour);
+                }
+
                 updateDisplay();
             }
 
             public void onNothingSelected(AdapterView adapterview) {
-                Toast.makeText(commonOperation.this, "XXXX", Toast.LENGTH_LONG).show();
-
             }
         });
     }
@@ -125,9 +164,21 @@ public abstract class commonOperation extends ActionBarActivity {
 
         @Override
         public void onDateSet(DatePicker view, int year, int month, int day) {
+            int original_eYear=eYear,original_eMonth=eMonth,original_eDay=eDay;
             eYear = year;
             eMonth = month;
             eDay = day;
+            int flag;
+            if (eYear < sYear) flag=1;
+            else if (eMonth < sMonth) flag=1;
+            else if (eDay < sDay) flag=1;
+            else flag=0;
+            if (flag==1)
+            {
+                eYear = original_eYear;
+                eMonth = original_eMonth;
+                eDay = original_eDay;
+            }
             updateDisplay();
         }
     }

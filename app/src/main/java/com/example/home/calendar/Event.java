@@ -123,6 +123,13 @@ public class Event {
         if( this.isStatic ) return true;
         else return false;
     }
+    // get a boolean value to make sure that the event crosses day
+    public boolean isCrossDay(){
+        if( this.startDate[0]!=this.endDate[0] || this.startDate[1]!=this.endDate[1] || this.startDate[2]!=this.endDate[2] ){
+            return true;
+        }
+        return false;
+    }
     // the function to print the all information of the event
     public void print(){
         System.out.println("id=" + id);

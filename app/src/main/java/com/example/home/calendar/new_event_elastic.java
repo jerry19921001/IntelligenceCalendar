@@ -50,7 +50,7 @@ public class new_event_elastic extends commonOperation {
             eYear = c.get(Calendar.YEAR);
             eMonth = c.get(Calendar.MONTH);
             eDay = c.get(Calendar.DAY_OF_MONTH);
-            eHour = c.get(Calendar.HOUR);
+            eHour = c.get(Calendar.HOUR) + 1;
             eMinute = 0;
             spendtime = 0;
         }
@@ -63,7 +63,7 @@ public class new_event_elastic extends commonOperation {
             eYear = BundleYear;
             eMonth = BundleMonth;
             eDay = BundleDay;
-            eHour = c.get(Calendar.HOUR);
+            eHour = c.get(Calendar.HOUR) + 1;
             eMinute = 0;
             spendtime = 0;
         }
@@ -89,6 +89,22 @@ public class new_event_elastic extends commonOperation {
                 break;
         }
     }
+    public boolean doHourErrorDetection(){
+        if(spendtime==-1||spendtime==0)return true;
+        Calendar sDate=Calendar.getInstance(),eDate=Calendar.getInstance();
+        sDate.set(sYear,sMonth,sDay,sHour,sMinute);
+        eDate.set(eYear,eMonth,eDay,eHour,eMinute);
+        long sDateTime=sDate.getTimeInMillis();
+        long eDateTime=eDate.getTimeInMillis();
+        long differ=(eDateTime-sDateTime)/(1000*60*60);//相差小時數
+        System.out.println("total Time:"+differ);
+        if(differ>spendtime){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
     public void OnClickButton(View Event)
     {
         if(Event.getId()== R.id.back) {//   cancel
@@ -101,35 +117,60 @@ public class new_event_elastic extends commonOperation {
             EditText name=( EditText )findViewById( R.id.name );// find the id of the edittext
             Editable string_event_name=name.getText();// get the text of the edittext
             event_name=string_event_name.toString();// change the text to string
-            if(checked) {
-                time = (EditText) findViewById(R.id.spend_time);
-                Editable string_spend_time = time.getText();
-                spendtime = Integer.parseInt(string_spend_time.toString());
+            boolean AllSpaceName=true;
+            for(int i=0;i<event_name.length();i+=1){
+                if(event_name.charAt(i)==' '){
+                    //continue checking
+                }
+                else{
+                    AllSpaceName=false;
+                    break;
+                }
             }
+                if(event_name.isEmpty()||AllSpaceName){
+                    Toast.makeText(getApplicationContext(),"Name space cann't be empty!!!",Toast.LENGTH_LONG).show();
+                }
+                else{
+                    if(checked) {
+                        time = (EditText) findViewById(R.id.spend_time);
+                        Editable string_spend_time = time.getText();
+                        String number=string_spend_time.toString();
+                        if(number.isEmpty()){
+                            spendtime=-1;
+                        }
+                        else{
+                            spendtime = Integer.parseInt(number);
+                        }
+                    }
+                    if(doHourErrorDetection()){
+                        Toast.makeText(this,"Do Hour Error or Do Hour equals to 0",Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        int start[]={ sYear,sMonth+1,sDay,sHour,sMinute };
+                        int end[]={ eYear,eMonth+1,eDay,eHour,eMinute };
+                        event=new Event( event_name,start,end );
+                        if(checked) {
+                            event.setDoHours(spendtime);
+                            event.setIsStatic(0);
+                        }
+                        else {
+                            int fixDoHours=calculateFixDoHours(start, end);
+                            event.setDoHours(fixDoHours);
+                            event.setIsStatic(1);
+                        }
+                        if (EventDb.Insert(event) == -1) {
+                            toast = Toast.makeText(getApplicationContext(), "Save has been fail", Toast.LENGTH_SHORT);
+                            toast.show();
+                        } else {
+                            toast = Toast.makeText(getApplication(), event.getName() + " has been saved", Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                        EventDb.Close();
+                        new_event_elastic.this.finish();
+                    }
 
-            int start[]={ sYear,sMonth+1,sDay,sHour,sMinute };
-            int end[]={ eYear,eMonth+1,eDay,eHour,eMinute };
-            event=new Event( event_name,start,end );
-            if(checked) {
-                event.setDoHours(spendtime);
-                event.setIsStatic(0);
+                }
             }
-            else {
-                int fixDoHours=calculateFixDoHours(start, end);
-                event.setDoHours(fixDoHours);
-                event.setIsStatic(1);
-            }
-            if (EventDb.Insert(event) == -1) {
-                toast = Toast.makeText(getApplicationContext(), "Save has been fail", Toast.LENGTH_SHORT);
-                toast.show();
-            } else {
-                toast = Toast.makeText(getApplication(), event.getName() + " has been saved", Toast.LENGTH_SHORT);
-                toast.show();
-            }
-            EventDb.Close();
-            new_event_elastic.this.finish();
-        }
-
     }
     public int calculateFixDoHours(int startDate[],int endDate[]){
         int answer=0;

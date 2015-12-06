@@ -80,39 +80,21 @@ public class EventsDao {
     }
     public boolean Update( Event event,int dif ){
         String where=Key_Id+"="+event.getPreviousId();
-        String sql="select * from "+Table_Name+" where "+where;
-        Cursor result=db.rawQuery(sql, null);
-        result.moveToFirst();
-        int originalDoHour=result.getInt(10);
-        int originalStart[]={result.getInt(2),result.getInt(3),result.getInt(4),result.getInt(5),0};
-        int originalEnd[]={result.getInt(6),result.getInt(7),result.getInt(8),result.getInt(9),0};
-        result.close();
-
-        int newDoHour=originalDoHour+dif;
-
         ContentValues cv=new ContentValues();
 
-        cv.put(Col_Event_Name,event.getName());
-        cv.put(Col_Start_Year, event.getStartYear());
-        cv.put(Col_Start_Month,event.getStartMonth());
-        cv.put(Col_Start_Day,event.getStartDay());
-        cv.put(Col_End_Year,event.getEndYear());
-        cv.put(Col_End_Month,event.getEndMonth());
-        cv.put(Col_End_Day,event.getEndDay());
-        if(event.isStatic()){// static event
-            cv.put(Col_Start_Hour,event.getStartHour());
-            cv.put(Col_End_Hour,event.getEndHour());
+        if( event.isStatic() ){
+            cv.put(Col_Event_Name,event.getName());
+            cv.put(Col_Start_Year, event.getStartYear());
+            cv.put(Col_Start_Month,event.getStartMonth());
+            cv.put(Col_Start_Day,event.getStartDay());
+            cv.put(Col_End_Year,event.getEndYear());
+            cv.put(Col_End_Month,event.getEndMonth());
+            cv.put(Col_End_Day,event.getEndDay());
+            if( event.isStatic() ) cv.put(Col_Is_Static,1);
+            else cv.put(Col_Is_Static,0);
+            cv.put(Col_Blocks, event.getBlocks());
+
         }
-        else{// schedulable event
-            if( event.getStartHour()<originalStart[3] ) cv.put(Col_Start_Hour,event.getStartHour());
-            else cv.put(Col_Start_Hour,originalStart[3]);
-            if( event.getEndHour()>originalEnd[3] ) cv.put(Col_End_Hour,event.getEndHour());
-            else cv.put(Col_End_Hour,originalEnd[3]);
-        }
-        cv.put(Col_Do_Hour,newDoHour);
-        if( event.isStatic() ) cv.put(Col_Is_Static,1);
-        else cv.put(Col_Is_Static,0);
-        cv.put(Col_Blocks, event.getBlocks());
 
         return db.update(Table_Name,cv,where,null)>0;
     }

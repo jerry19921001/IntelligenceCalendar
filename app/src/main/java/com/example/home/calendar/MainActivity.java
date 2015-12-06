@@ -232,6 +232,8 @@ public class MainActivity extends ActionBarActivity {
                 today.putInt("Day", choose.get(Calendar.DAY_OF_MONTH));
                 get_start_elastic.putExtras(today);
                 startActivity(get_start_elastic);
+                lastview = null;
+                lastview_click = false;
                 break;
             case R.id.Sort_Event:
                 //database=new MixEventDAO(this);

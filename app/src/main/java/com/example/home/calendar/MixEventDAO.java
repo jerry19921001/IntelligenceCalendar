@@ -5,7 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by user on 2015/9/26.
@@ -118,6 +122,8 @@ public class MixEventDAO {
         result.close();
     }
     public void InsertStaticEvents(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH");
+        long millionOfOneDay=86400000; // 60*60*24*1000=86400000
         String sql="select * "+
                 " from "+EventsDao.Table_Name+
                 " where "+EventsDao.Col_Is_Static+">0";//+" and "+EventsDao.Col_Inside_MixEventDAO+"=0";
@@ -126,7 +132,7 @@ public class MixEventDAO {
             result.close();
             return;
         }
-
+        System.out.println("in insert static while loop");
         while (result.moveToNext()){
             int start[]={ result.getInt(2),result.getInt(3),result.getInt(4),result.getInt(5),0 };
             int end[]={ result.getInt(6),result.getInt(7),result.getInt(8),result.getInt(9),0 };
@@ -136,7 +142,61 @@ public class MixEventDAO {
             temp.setDoHours(result.getInt(11));
             temp.setIsStatic(1);
 
-            if( Insert( temp )==-1 ) break;
+            temp.print();
+
+            if( temp.isCrossDay() ){
+                // set the format of date
+                String startD1=temp.getStartYear()+"/"+temp.getStartMonth()+"/"+temp.getStartDay()+" "+temp.getStartHour();
+                String endD2=temp.getEndYear()+"/"+temp.getEndMonth()+"/"+temp.getEndDay()+" "+temp.getEndHour();
+                // change the string to date format
+                Date d1=null,d2= null;
+                try {
+                    d1 = sdf.parse(startD1);
+                    d2=sdf.parse(endD2);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                // calculate the different day
+                long differentDay=Math.abs( (d2.getTime()-d1.getTime())/millionOfOneDay )+1;
+                //set the static event which can cross day
+                Calendar c=Calendar.getInstance();
+                c.setTime(d1);
+                int days=0;
+
+                while( days<differentDay ){
+                    Event cutEvents=new Event();
+                    cutEvents.setName(temp.getName());
+                    if( days==0 ){ //the first day
+                        int tempStart[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY),0 };
+                        int tempEnd[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),24,0 };
+                        cutEvents.setStartDate(tempStart);
+                        cutEvents.setEndDate(tempEnd);
+                    }
+                    else if( differentDay-days==1 ){ // the last day
+                        int tempStart[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),0,0 };
+                        int tempEnd[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),temp.getEndHour(),0 };
+                        cutEvents.setStartDate(tempStart);
+                        cutEvents.setEndDate(tempEnd);
+                    }
+                    else{ // the other day
+                        int tempStart[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),0,0 };
+                        int tempEnd[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),24,0 };
+                        cutEvents.setStartDate(tempStart);
+                        cutEvents.setEndDate(tempEnd);
+                    }
+                    cutEvents.setIsStatic(1);
+                    cutEvents.setPreviousId(temp.getId());
+                    cutEvents.setDoHours(temp.getDoHours());
+
+                    this.Insert(cutEvents);
+
+                    c.add(Calendar.DAY_OF_MONTH,1);
+                    days=days+1;
+                }
+            }
+            else{
+                Insert( temp );
+            }
         }
 
         result.close();
