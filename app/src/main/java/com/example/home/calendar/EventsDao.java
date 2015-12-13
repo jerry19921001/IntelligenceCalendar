@@ -79,24 +79,31 @@ public class EventsDao {
         return id;
     }
     public boolean Update( Event event,int dif ){
-        String where=Key_Id+"="+event.getPreviousId();
+        String where=Key_Id+"="+event.getId();
         ContentValues cv=new ContentValues();
+        //System.out.println("in eventdao update");
+        //event.print();
 
-        if( event.isStatic() ){
-            cv.put(Col_Event_Name,event.getName());
-            cv.put(Col_Start_Year, event.getStartYear());
-            cv.put(Col_Start_Month,event.getStartMonth());
-            cv.put(Col_Start_Day,event.getStartDay());
-            cv.put(Col_End_Year,event.getEndYear());
-            cv.put(Col_End_Month,event.getEndMonth());
-            cv.put(Col_End_Day,event.getEndDay());
-            if( event.isStatic() ) cv.put(Col_Is_Static,1);
-            else cv.put(Col_Is_Static,0);
-            cv.put(Col_Blocks, event.getBlocks());
-
-        }
+        cv.put(Col_Event_Name, event.getName());
+        cv.put(Col_Start_Year, event.getStartYear());
+        cv.put(Col_Start_Month,event.getStartMonth());
+        cv.put(Col_Start_Day,event.getStartDay());
+        cv.put(Col_Start_Hour,event.getStartHour());
+        cv.put(Col_End_Year,event.getEndYear());
+        cv.put(Col_End_Month,event.getEndMonth());
+        cv.put(Col_End_Day,event.getEndDay());
+        cv.put(Col_End_Hour,event.getEndHour());
+        if( event.isStatic() ) cv.put(Col_Is_Static,1);
+        else cv.put(Col_Is_Static,0);
+        cv.put(Col_Do_Hour,event.getDoHours());
+        cv.put(Col_Blocks, event.getBlocks());
+        cv.put(Col_Inside_MixEventDAO,0);
 
         return db.update(Table_Name,cv,where,null)>0;
+    }
+    public boolean Delete( long id ){
+        String where=Key_Id+"="+id;
+        return db.delete( Table_Name,where,null )>0;
     }
     public ArrayList<Event> GetOneDayEvents( int sYear,int sMonth,int sDay ){
         String sql="select * "+
@@ -121,10 +128,6 @@ public class EventsDao {
         c.close();
 
         return oneDayEvents;
-    }
-    public boolean Delete( long id ){
-        String where=Key_Id+"="+id;
-        return db.delete( Table_Name,where,null )>0;
     }
     public ArrayList<Event>AllEvents(){
         String sql=" select * from "+Table_Name+
@@ -151,14 +154,16 @@ public class EventsDao {
     public Event getOneEvent( long id ){
         String sql="select * from "+Table_Name+" where "+Key_Id+" = "+id;
         Cursor result=db.rawQuery(sql,null);
-        result.moveToFirst();
+        result.moveToNext();
 
         int start[]={ result.getInt(2),result.getInt(3),result.getInt(4),result.getInt(5),0 };
         int end[]={ result.getInt(6),result.getInt(7),result.getInt(8),result.getInt(9),0 };
-        Event e=new Event( result.getString(0),start,end );
+        Event e=new Event( result.getString(1),start,end );
+        e.setId(result.getLong(0));
         e.setDoHours(result.getInt(10));
         e.setIsStatic(result.getInt(11));
         e.setBlocks(result.getInt(12));
+
         result.close();
 
         return e;

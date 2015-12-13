@@ -190,18 +190,18 @@ public class new_event_elastic extends commonOperation {
         return answer;
     }
     public void changeDate(View event){
-        if(event.getId()==R.id.button){
+        if(event.getId()==R.id.startdate){
             Bstartdate.callOnClick();
         }
-        else if(event.getId()==R.id.button2){
+        else if(event.getId()==R.id.enddate){
             Benddate.callOnClick();
         }
     }
     public void findViews() {
         showStartDate = (TextView) findViewById(R.id.startdate);
         showEndDate = (TextView) findViewById(R.id.enddate);
-        showStartTime = (TextView) findViewById(R.id.starttime);
-        showEndTime = (TextView) findViewById(R.id.endtime);
+        //showStartTime = (TextView) findViewById(R.id.starttime);
+        //showEndTime = (TextView) findViewById(R.id.endtime);
         Bstartdate = (Button) findViewById(R.id.start_date);
         Benddate = (Button) findViewById(R.id.end_date);
         //SelectTime();

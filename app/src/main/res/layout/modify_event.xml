@@ -27,53 +27,58 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/InputName" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Start Date"
-                android:id="@+id/GetStartDate" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/ShowStartDate" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Start Date"
+                    android:id="@+id/GetStartDate" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/ShowStartTime" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:id="@+id/ShowStartDate"
+                    android:onClick="changeDate"
+                    android:clickable="true" />
 
-            <Spinner
-                android:layout_width="100dp"
-                android:layout_height="fill_parent"
-                android:id="@+id/GetStartTime"
-                android:spinnerMode="dropdown" />
+                <Spinner
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/GetStartTime"
+                    android:spinnerMode="dropdown" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="End Date"
-                android:id="@+id/GetEndDate" />
+            </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/ShowEndDate" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/ShowEndTime" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="End Date"
+                    android:id="@+id/GetEndDate" />
 
-            <Spinner
-                android:layout_width="100dp"
-                android:layout_height="fill_parent"
-                android:id="@+id/GetEndTime"
-                android:spinnerMode="dropdown" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:id="@+id/ShowEndDate"
+                    android:clickable="true"
+                    android:onClick="changeDate" />
+
+                <Spinner
+                    android:layout_width="100dp"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/GetEndTime"
+                    android:spinnerMode="dropdown" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"

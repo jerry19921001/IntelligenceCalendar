@@ -55,9 +55,9 @@ public abstract class commonOperation extends ActionBarActivity {
         StringBuilder eDate = new StringBuilder().append(eYear).append("-").append(extendToTwoDigit(eMonth+1)).append("-").append(extendToTwoDigit(eDay));
         showEndDate.setText(eDate);
         //StringBuilder sTime = new StringBuilder().append(extendToTwoDigit(sHour)).append(":00");
-        showStartTime.setText("Start Hour");
+        //showStartTime.setText("Start Hour");
         //StringBuilder eTime = new StringBuilder().append(extendToTwoDigit(eHour)).append(":00");
-        showEndTime.setText("End Hour");
+        //showEndTime.setText("End Hour");
     }
     public void selectTime(){
         String data[] = new String[24];//set Spinner's data
@@ -80,7 +80,7 @@ public abstract class commonOperation extends ActionBarActivity {
                     Toast.makeText(getApplicationContext(),"Start Hour can not be exceed by End Hour",Toast.LENGTH_SHORT).show();
                     startSpinner.setSelection(sHour);
                 }*/
-                if (eHour <= sHour) {
+                if (eHour <= sHour&&!errorTimeDetection()) {
                     if (sHour == 23)
                     {
                         Calendar temp=Calendar.getInstance();
@@ -140,11 +140,17 @@ public abstract class commonOperation extends ActionBarActivity {
             sYear = year;
             sMonth = month;
             sDay = day;
-            int flag;
-            if (eYear < sYear) flag=1;
-            else if (eMonth < sMonth) flag=1;
-            else if (eDay < sDay) flag=1;
-            else flag=0;
+            int flag = 0;
+            if (eYear <= sYear)
+            {
+                if (eMonth <= sMonth)
+                {
+                    if (eDay <= sDay)
+                    {
+                        flag = 1;
+                    }
+                }
+            }
             if (flag==1)
             {
                 eYear = year;
@@ -164,15 +170,29 @@ public abstract class commonOperation extends ActionBarActivity {
 
         @Override
         public void onDateSet(DatePicker view, int year, int month, int day) {
-            int original_eYear=eYear,original_eMonth=eMonth,original_eDay=eDay;
+            int original_eYear = eYear, original_eMonth = eMonth, original_eDay = eDay;
             eYear = year;
             eMonth = month;
             eDay = day;
-            int flag;
-            if (eYear < sYear) flag=1;
-            else if (eMonth < sMonth) flag=1;
-            else if (eDay < sDay) flag=1;
-            else flag=0;
+            int flag = 0;
+            if (eYear <= sYear)
+            {
+                System.out.println("Year");
+                if (eMonth <= sMonth)
+                {
+                    System.out.println("Month");
+                    if (eDay < sDay)
+                    {
+                        System.out.println("Day");
+                        flag = 1;
+                    }
+                    else if(eDay==sDay){
+                        if(eHour<sHour){
+                            flag=1;
+                        }
+                    }
+                }
+            }
             if (flag==1)
             {
                 eYear = original_eYear;

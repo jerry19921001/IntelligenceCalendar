@@ -1,7 +1,6 @@
 package com.example.home.calendar;
 
 import android.app.FragmentManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -20,7 +19,7 @@ public class modify_event extends commonOperation {
     private EventsDao task;
     private MixEventDAO subTask;
     private long eventID;
-    private Event modifyEvent;
+    private Event modifyEvent,temp;
     private boolean isStatic=false;
     private int ori_sYear, ori_sMonth, ori_sDay, ori_sHour, ori_sMinute, ori_eYear, ori_eMonth, ori_eDay, ori_eHour, ori_eMinute;
 
@@ -33,8 +32,13 @@ public class modify_event extends commonOperation {
         eventID = getIntent().getLongExtra("ID", 100);
         task= new EventsDao(this);
         subTask =new MixEventDAO(this);
+        temp=new Event();
         modifyEvent = new Event();
-        modifyEvent = subTask.getOneEvent(eventID);
+        temp = subTask.getOneEvent(eventID);
+        modifyEvent=task.getOneEvent(temp.getPreviousId());
+
+        //System.out.println("in modify_event");
+        modifyEvent.print();
 
         isStatic=modifyEvent.isStatic();
         //The following two View just in modify_event.layout.
@@ -73,8 +77,8 @@ public class modify_event extends commonOperation {
     public void findViews() {
         showStartDate = (TextView) findViewById(R.id.ShowStartDate);
         showEndDate = (TextView) findViewById(R.id.ShowEndDate);
-        showStartTime = (TextView) findViewById(R.id.ShowStartTime);
-        showEndTime = (TextView) findViewById(R.id.ShowEndTime);
+        //showStartTime = (TextView) findViewById(R.id.ShowStartTime);
+        //showEndTime = (TextView) findViewById(R.id.ShowEndTime);
         Bstartdate = (Button) findViewById(R.id.GetStartDate);
         Benddate = (Button) findViewById(R.id.GetEndDate);
         //SelectTime();
@@ -116,7 +120,7 @@ public class modify_event extends commonOperation {
         long sDateTime=sDate.getTimeInMillis();
         long eDateTime=eDate.getTimeInMillis();
         long differ=(eDateTime-sDateTime)/(1000*60*60);//相差小時數
-        System.out.println("total Time:"+differ);
+        //System.out.println("total Time:"+differ);
         if(differ>spendtime){
             return false;
         }
@@ -127,7 +131,7 @@ public class modify_event extends commonOperation {
     public void modifyEvent(View decision) {
         switch (decision.getId()) {
             case R.id.Delete_Button:
-                task.Delete(modifyEvent.getPreviousId());
+                task.Delete(modifyEvent.getId());
                 subTask.Delete(modifyEvent.getId());
                 modify_event.this.finish();
                 break;
@@ -150,7 +154,7 @@ public class modify_event extends commonOperation {
                 if(!AllSpaceName){
                     int start[] = {sYear, sMonth + 1, sDay, sHour, sMinute};
                     int end[] = {eYear, eMonth + 1, eDay, eHour, eMinute};
-                    modifyEvent.setAll(eventID, name.getText().toString(), start, end);
+                    modifyEvent.setAll(temp.getPreviousId(), name.getText().toString(), start, end);
                     EditText setDoHour=(EditText)findViewById(R.id.spend_time);
                     if(!isStatic){
                         if(setDoHour.getText().toString().isEmpty()){
@@ -161,7 +165,7 @@ public class modify_event extends commonOperation {
                         }
                         modifyEvent.setDoHours(spendtime);
                     }
-                    if(!doHourErrorDetection()){
+                    if(!doHourErrorDetection() || isStatic ){
                         //Intent RestartMainPage=new Intent( modify_event.this, MainActivity.class );
                         //startActivity(RestartMainPage);
                         task.Update(modifyEvent,different());
@@ -199,6 +203,14 @@ public class modify_event extends commonOperation {
         result=(int)((result1-result2)/(1000*3600));
         return result;
 
+    }
+    public void changeDate(View event){
+        if(event.getId()==R.id.ShowStartDate){
+            Bstartdate.callOnClick();
+        }
+        else if(event.getId()==R.id.ShowEndDate){
+            Benddate.callOnClick();
+        }
     }
 }
 
