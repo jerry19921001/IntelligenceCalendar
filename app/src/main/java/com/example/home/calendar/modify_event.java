@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -107,32 +108,80 @@ public class modify_event extends commonOperation {
         startActivity(RestartMainPage);
         modify_event.this.finish();
     }*/
-    public void modifyEvent(View decision) {
-        EditText name = (EditText) findViewById(R.id.InputName);
-        int start[] = {sYear, sMonth + 1, sDay, sHour, sMinute};
-        int end[] = {eYear, eMonth + 1, eDay, eHour, eMinute};
-        modifyEvent.setAll(eventID, name.getText().toString(), start, end);
-        if(!isStatic){
-            EditText setDoHour=(EditText)findViewById(R.id.spend_time);
-            spendtime=Integer.parseInt(setDoHour.getText().toString());
-            modifyEvent.setDoHours(spendtime);
+    public boolean doHourErrorDetection(){
+        if(spendtime==-1||spendtime==0)return true;
+        Calendar sDate=Calendar.getInstance(),eDate=Calendar.getInstance();
+        sDate.set(sYear,sMonth,sDay,sHour,sMinute);
+        eDate.set(eYear,eMonth,eDay,eHour,eMinute);
+        long sDateTime=sDate.getTimeInMillis();
+        long eDateTime=eDate.getTimeInMillis();
+        long differ=(eDateTime-sDateTime)/(1000*60*60);//相差小時數
+        System.out.println("total Time:"+differ);
+        if(differ>spendtime){
+            return false;
         }
-
+        else{
+            return true;
+        }
+    }
+    public void modifyEvent(View decision) {
         switch (decision.getId()) {
-            case R.id.Modify_Button:
-                task.Update(modifyEvent,different());
-                subTask.Update(modifyEvent);
-                break;
             case R.id.Delete_Button:
                 task.Delete(modifyEvent.getPreviousId());
                 subTask.Delete(modifyEvent.getId());
+                modify_event.this.finish();
                 break;
-            default://Cancel_Button
+            case R.id.Cancel_Button:
+                modify_event.this.finish();
+                break;
+            case R.id.Modify_Button:
+                EditText name = (EditText) findViewById(R.id.InputName);
+                String new_name=name.getText().toString();
+                boolean AllSpaceName=true;
+                for(int i=0;i<new_name.length();i+=1){
+                    if(new_name.charAt(i)==' '){
+                        //continue checking
+                    }
+                    else{
+                        AllSpaceName=false;
+                        break;
+                    }
+                }
+                if(!AllSpaceName){
+                    int start[] = {sYear, sMonth + 1, sDay, sHour, sMinute};
+                    int end[] = {eYear, eMonth + 1, eDay, eHour, eMinute};
+                    modifyEvent.setAll(eventID, name.getText().toString(), start, end);
+                    EditText setDoHour=(EditText)findViewById(R.id.spend_time);
+                    if(!isStatic){
+                        if(setDoHour.getText().toString().isEmpty()){
+                            spendtime=-1;
+                        }
+                        else{
+                            spendtime=Integer.parseInt(setDoHour.getText().toString());
+                        }
+                        modifyEvent.setDoHours(spendtime);
+                    }
+                    if(!doHourErrorDetection()){
+                        //Intent RestartMainPage=new Intent( modify_event.this, MainActivity.class );
+                        //startActivity(RestartMainPage);
+                        task.Update(modifyEvent,different());
+                        subTask.Update(modifyEvent);
+                        modify_event.this.finish();
+                    }
+                    else{
+                        Toast.makeText(this,"Spend time Error!!!",Toast.LENGTH_LONG).show();
+                    }
+
+                }
+                else{
+                    Toast.makeText(this,"Name space cann't be empty!!!",Toast.LENGTH_LONG).show();
+                }
+                break;
+            default:
                 break;
         }
-        //Intent RestartMainPage=new Intent( modify_event.this, MainActivity.class );
-        //startActivity(RestartMainPage);
-        modify_event.this.finish();
+
+
     }
     private int different(){
         int result=0;

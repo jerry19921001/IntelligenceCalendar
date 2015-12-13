@@ -142,8 +142,8 @@ public class new_event_elastic extends commonOperation {
                             spendtime = Integer.parseInt(number);
                         }
                     }
-                    if(doHourErrorDetection()){
-                        Toast.makeText(this,"Do Hour Error or Do Hour equals to 0",Toast.LENGTH_SHORT).show();
+                    if(doHourErrorDetection()&&checked){
+                        Toast.makeText(this,"Spend Hour Error or Spend Hour equals to 0",Toast.LENGTH_SHORT).show();
                     }
                     else{
                         int start[]={ sYear,sMonth+1,sDay,sHour,sMinute };
@@ -188,6 +188,14 @@ public class new_event_elastic extends commonOperation {
         }
         //System.out.println("DoHours:"+answer);
         return answer;
+    }
+    public void changeDate(View event){
+        if(event.getId()==R.id.button){
+            Bstartdate.callOnClick();
+        }
+        else if(event.getId()==R.id.button2){
+            Benddate.callOnClick();
+        }
     }
     public void findViews() {
         showStartDate = (TextView) findViewById(R.id.startdate);
