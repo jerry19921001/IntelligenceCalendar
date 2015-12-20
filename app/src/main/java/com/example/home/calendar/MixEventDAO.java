@@ -210,7 +210,7 @@ public class MixEventDAO {
         result.close();
     }
     public void Sort(){
-        int month[]={0,31,28,31,30,31,30,31,31,30,31,30,31};
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy/MM/dd HH");
         String sql="select * "+
                 "from "+EventsDao.Table_Name+
                 " where "+Col_Is_Static+"=0"+
@@ -224,33 +224,38 @@ public class MixEventDAO {
         }
         //start sort
         while ( dynamicResult.moveToNext() ){
-            // get the information of the dynamic event
+            // get the information of one dynamic event
             int start[]={ dynamicResult.getInt(2),dynamicResult.getInt(3),dynamicResult.getInt(4),dynamicResult.getInt(5),0 };
             int end[]={ dynamicResult.getInt(6),dynamicResult.getInt(7),dynamicResult.getInt(8),dynamicResult.getInt(9),0 };
             Event dynamicEvent=new Event(dynamicResult.getString(1),start,end);
             dynamicEvent.setDoHours(dynamicResult.getInt(10));
             dynamicEvent.setId(dynamicResult.getLong(0));
             dynamicEvent.setPreviousId(dynamicResult.getLong(0));
+            //set the date and the calendar for the dynamic event
+            String startDate=dynamicEvent.getStartYear()+"/"+dynamicEvent.getStartMonth()+"/"+dynamicEvent.getStartDay()+" "+dynamicEvent.getStartHour();
+            Date date=null;
+            Calendar calendar=Calendar.getInstance();
+            try {
+                date=sdf.parse(startDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            calendar.setTime(date);
             //find which day can put something
             int remainDoHour=dynamicEvent.getDoHours();
-            int startDay=dynamicEvent.getStartDay();
-            int startMonth=dynamicEvent.getStartMonth();
             // find which hours and which days can be use
             while( remainDoHour>0 ){
+                //get the start month
+                int startMonth=calendar.get(Calendar.MONTH)+1;
                 // the 24 hours of one day
                 boolean hours[]=new boolean[24];
                 for(int i=0;i<24;i++){
                     if( i<6 ) hours[i]=false;// 0~6 sleep time
                     else hours[i]=true;
                 }
-                // check the day
-                if( startDay>month[startMonth] ){
-                    startDay=1;
-                    startMonth=startMonth+1;
-                }
                 // find the static events of the day
                 String sqlOfStaticEvent="select * from "+tableName+
-                        " where "+Col_Start_Year+"="+dynamicEvent.getStartYear()+" and "+Col_Start_Month+"="+startMonth+" and "+Col_Start_Day+"="+startDay;
+                        " where "+Col_Start_Year+"="+calendar.get(Calendar.YEAR)+" and "+Col_Start_Month+"="+startMonth+" and "+Col_Start_Day+"="+calendar.get(Calendar.DAY_OF_MONTH);
                 Cursor staticResult=database.rawQuery(sqlOfStaticEvent,null);
                 if( staticResult.getCount()!=0 ){
                     while( staticResult.moveToNext() ){
@@ -263,53 +268,59 @@ public class MixEventDAO {
                 staticResult.close();
                 // check the start hour nad the start day
                 int startHour=0;
-                if( startDay==dynamicEvent.getStartDay() ) startHour=dynamicEvent.getStartHour();
+                if( calendar.get(Calendar.DAY_OF_MONTH)==dynamicEvent.getStartDay() ) startHour=dynamicEvent.getStartHour();
                 else startHour=6;
                 // the information to insert new event
                 int useHour=0;
                 // find hours to insert the dynamic event
                 for(int i=startHour;i<24;i=i+1){
                     if( hours[i] && remainDoHour>0 ){
-                        useHour=useHour+1;
-                        remainDoHour=remainDoHour-1;
-                        hours[i]=false;
-                        //int temp=remainDoHour;
+                        boolean endOfTheDay=false;
                         // make sure the next hour
-                        for(int j=i+1;j<24;j++){
+                        for(int j=i;j<24;j++){
                             if( !hours[j] || remainDoHour==0 ){
-                                int startTime[]={ dynamicEvent.getStartYear(),startMonth,startDay,i,0 };
-                                int endTime[]={ dynamicEvent.getStartYear(),startMonth,startDay,j,0 };
+                                endOfTheDay=false;
+                                int startTime[]={ calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH),i,0 };
+                                int endTime[]={ calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH),j,0 };
                                 Event eventInsertToMix=new Event(dynamicEvent.getName(),startTime,endTime);
                                 eventInsertToMix.setPreviousId(dynamicEvent.getId());
                                 eventInsertToMix.setDoHours(useHour);
-                                System.out.println("in for for if : ");
-                                eventInsertToMix.print();
                                 Insert(eventInsertToMix);
                                 i=j;
                                 break;
-                            }
-                            else if( j==23 ){
-                                int startTime[]={ dynamicEvent.getStartYear(),startMonth,startDay,i,0 };
-                                int endTime[]={ dynamicEvent.getStartYear(),startMonth,startDay,24,0 };
-                                Event eventInsertToMix=new Event(dynamicEvent.getName(),startTime,endTime);
-                                eventInsertToMix.setPreviousId(dynamicEvent.getId());
-                                eventInsertToMix.setDoHours(useHour);
-                                System.out.println("in for for else if : ");
-                                eventInsertToMix.print();
-                                Insert(eventInsertToMix);
-                                i=j;
                             }
                             else{
                                 hours[j]=false;
                                 useHour=useHour+1;
                                 remainDoHour=remainDoHour-1;
+                                endOfTheDay=true;
                             }
+                            //check if j==23
+                            /*if( j==23 ){ // the end of the end time
+                                int startTime[]={ calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH),i,0 };
+                                int endTime[]={ calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH),23,0 };
+                                Event eventInsertToMix=new Event(dynamicEvent.getName(),startTime,endTime);
+                                eventInsertToMix.setPreviousId(dynamicEvent.getId());
+                                eventInsertToMix.setDoHours(useHour);
+                                System.out.println("in for for if(j==23) : ");
+                                eventInsertToMix.print();
+                                Insert(eventInsertToMix);
+                                i=j;
+                            }*/
+                        }
+                        if( endOfTheDay ){
+                            int startTime[]={ calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH),i,0 };
+                            int endTime[]={ calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.DAY_OF_MONTH),24,0 };
+                            Event eventInsertToMix=new Event(dynamicEvent.getName(),startTime,endTime);
+                            eventInsertToMix.setPreviousId(dynamicEvent.getId());
+                            eventInsertToMix.setDoHours(useHour);
+                            Insert(eventInsertToMix);
                         }
                     }
                     if( remainDoHour==0 ) break;
                 }
                 // find the next day
-                startDay=startDay+1;
+                calendar.add(Calendar.DAY_OF_YEAR,1);
             }
         }
 

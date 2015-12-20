@@ -115,7 +115,7 @@ public class list_event extends ActionBarActivity{
     }
 
     private void DataInitial() {
-        int addDay=1;
+        int addDay=0;
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
         System.out.println("Date:" + cal.get(Calendar.DAY_OF_MONTH) + " DoW:" + dayOfWeek);
         if(!Sun_T_Mon_F){
