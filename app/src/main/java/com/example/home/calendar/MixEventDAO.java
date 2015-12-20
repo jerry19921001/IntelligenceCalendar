@@ -132,7 +132,7 @@ public class MixEventDAO {
             result.close();
             return;
         }
-        System.out.println("in insert static while loop");
+
         while (result.moveToNext()){
             int start[]={ result.getInt(2),result.getInt(3),result.getInt(4),result.getInt(5),0 };
             int end[]={ result.getInt(6),result.getInt(7),result.getInt(8),result.getInt(9),0 };
@@ -141,8 +141,6 @@ public class MixEventDAO {
             temp.setPreviousId(result.getLong(0));
             temp.setDoHours(result.getInt(11));
             temp.setIsStatic(1);
-
-            temp.print();
 
             if( temp.isCrossDay() ){
                 // set the format of date
@@ -157,17 +155,27 @@ public class MixEventDAO {
                     e.printStackTrace();
                 }
                 // calculate the different day
-                long differentDay=Math.abs( (d2.getTime()-d1.getTime())/millionOfOneDay )+1;
+                long differentDay=Math.abs((d2.getTime() - d1.getTime()) / millionOfOneDay);
+                long mod_differentDay = Math.abs((d2.getTime() - d1.getTime()) % millionOfOneDay);
+                if (mod_differentDay != 0) differentDay ++;
+                if (temp.getEndHour() != 0)
+                {
+                    differentDay ++;
+                }
                 //set the static event which can cross day
                 Calendar c=Calendar.getInstance();
-                c.setTime(d1);
+                Calendar c1=Calendar.getInstance();
+                c.setTime(d1);//start time
+                c1.setTime(d2);//end time
                 int days=0;
+                //System.out.println("c.getday="+c.get(Calendar.DAY_OF_MONTH));
 
                 while( days<differentDay ){
                     Event cutEvents=new Event();
                     cutEvents.setName(temp.getName());
                     if( days==0 ){ //the first day
                         int tempStart[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY),0 };
+                        //c.add(Calendar.DAY_OF_MONTH,1);
                         int tempEnd[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),24,0 };
                         cutEvents.setStartDate(tempStart);
                         cutEvents.setEndDate(tempEnd);
@@ -265,7 +273,7 @@ public class MixEventDAO {
                         useHour=useHour+1;
                         remainDoHour=remainDoHour-1;
                         hours[i]=false;
-                        int temp=remainDoHour;
+                        //int temp=remainDoHour;
                         // make sure the next hour
                         for(int j=i+1;j<24;j++){
                             if( !hours[j] || remainDoHour==0 ){
@@ -274,9 +282,22 @@ public class MixEventDAO {
                                 Event eventInsertToMix=new Event(dynamicEvent.getName(),startTime,endTime);
                                 eventInsertToMix.setPreviousId(dynamicEvent.getId());
                                 eventInsertToMix.setDoHours(useHour);
+                                System.out.println("in for for if : ");
+                                eventInsertToMix.print();
                                 Insert(eventInsertToMix);
                                 i=j;
                                 break;
+                            }
+                            else if( j==23 ){
+                                int startTime[]={ dynamicEvent.getStartYear(),startMonth,startDay,i,0 };
+                                int endTime[]={ dynamicEvent.getStartYear(),startMonth,startDay,24,0 };
+                                Event eventInsertToMix=new Event(dynamicEvent.getName(),startTime,endTime);
+                                eventInsertToMix.setPreviousId(dynamicEvent.getId());
+                                eventInsertToMix.setDoHours(useHour);
+                                System.out.println("in for for else if : ");
+                                eventInsertToMix.print();
+                                Insert(eventInsertToMix);
+                                i=j;
                             }
                             else{
                                 hours[j]=false;
