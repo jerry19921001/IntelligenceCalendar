@@ -385,4 +385,24 @@ public class MixEventDAO {
 
         return fatherEvent;
     }
+    public boolean[] getOneDayHourTime(int year,int month,int day){
+        boolean hours[]=new boolean[24];
+        String sql="select * from "+tableName+
+                " where "+Col_Start_Year+"="+year+" and "+Col_Start_Month+"="+month+" and "+Col_Start_Day+"="+day;
+        Cursor result=database.rawQuery(sql,null);
+
+        for(int i=0;i<24;i=i+1){
+            if( i<6 ) hours[i] = false;
+            else hours[i]=true;
+        }
+        while( result.moveToNext() ){
+            int start=result.getInt(5),end=result.getInt(9);
+            for(int i=start;i<end;i=i+1){
+                hours[i]=false;
+            }
+        }
+        result.close();
+
+        return hours;
+    }
 }
