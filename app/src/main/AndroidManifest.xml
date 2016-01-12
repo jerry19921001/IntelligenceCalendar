@@ -24,6 +24,8 @@
             android:name=".UserPage"
             android:label="@string/title_activity_user_page" >
         </activity>
+        <activity android:name = ".SchedulePage" />
+        <activity android:name = ".Scheduling" />
     </application>
 
 </manifest>

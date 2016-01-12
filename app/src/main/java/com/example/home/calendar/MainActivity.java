@@ -195,7 +195,7 @@ public class MainActivity extends ActionBarActivity {
         database=new MixEventDAO(this);
         database.DeleteAll();
         database.InsertStaticEvents();
-        database.Sort();
+        //database.Sort();
         //database.Close();
         try {
             SetNotify();
@@ -236,11 +236,8 @@ public class MainActivity extends ActionBarActivity {
                 lastview_click = false;
                 break;
             case R.id.Sort_Event:
-                //database=new MixEventDAO(this);
-                database.DeleteAll();
-                database.InsertStaticEvents();
-                database.Sort();
-                //database.Close();
+                Intent sort = new Intent(MainActivity.this, SchedulePage.class);
+                startActivity(sort);
                 break;
             case R.id.Today:
                 caldroidFragment.moveToDate(cal.getTime());
