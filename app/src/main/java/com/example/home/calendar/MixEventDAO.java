@@ -81,6 +81,11 @@ public class MixEventDAO {
 
         return id;
     }
+    public void InsertFromArrayList(ArrayList<Event> e){
+        for (int i=0;i<e.size();i=i+1){
+            this.Insert( e.get(i) );
+        }
+    }
     public boolean Update( Event e ){
         String where=Key+"="+e.getId();
         ContentValues cv=new ContentValues();
@@ -98,7 +103,7 @@ public class MixEventDAO {
         cv.put(Col_Do_Hour,e.getDoHours());
         if( e.isStatic() ) cv.put(Col_Is_Static,1);
         else cv.put(Col_Is_Static,0);
-        cv.put(Col_No,e.getNo());
+        cv.put(Col_No, e.getNo());
 
         return database.update(tableName,cv,where,null)>0;
     }
@@ -117,7 +122,7 @@ public class MixEventDAO {
 
         while (result.moveToNext()){
             String where=Key+"="+result.getInt(0);
-            int count=database.delete(tableName,where,null);
+            database.delete(tableName,where,null);
         }
         result.close();
     }
@@ -144,8 +149,8 @@ public class MixEventDAO {
 
             if( temp.isCrossDay() ){
                 // set the format of date
-                String startD1=temp.getStartYear()+"/"+temp.getStartMonth()+"/"+temp.getStartDay()+" "+temp.getStartHour();
-                String endD2=temp.getEndYear()+"/"+temp.getEndMonth()+"/"+temp.getEndDay()+" "+temp.getEndHour();
+                String startD1=temp.getStartYear()+"/"+temp.getStartMonth()+"/"+temp.getStartDay()+" "+"00";
+                String endD2=temp.getEndYear()+"/"+temp.getEndMonth()+"/"+temp.getEndDay()+" "+"00";
                 // change the string to date format
                 Date d1=null,d2= null;
                 try {
@@ -156,8 +161,6 @@ public class MixEventDAO {
                 }
                 // calculate the different day
                 long differentDay=Math.abs((d2.getTime() - d1.getTime()) / millionOfOneDay);
-                long mod_differentDay = Math.abs((d2.getTime() - d1.getTime()) % millionOfOneDay);
-                if (mod_differentDay != 0) differentDay ++;
                 if (temp.getEndHour() != 0)
                 {
                     differentDay ++;
@@ -165,6 +168,14 @@ public class MixEventDAO {
                 //set the static event which can cross day
                 Calendar c=Calendar.getInstance();
                 Calendar c1=Calendar.getInstance();
+                String startd=temp.getStartYear()+"/"+temp.getStartMonth()+"/"+temp.getStartDay()+" "+temp.getStartHour();
+                String endd=temp.getEndYear()+"/"+temp.getEndMonth()+"/"+temp.getEndDay()+" "+temp.getEndHour();
+                try {
+                    d1 = sdf.parse(startd);
+                    d2=sdf.parse(endd);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 c.setTime(d1);//start time
                 c1.setTime(d2);//end time
                 int days=0;
@@ -183,6 +194,14 @@ public class MixEventDAO {
                     else if( differentDay-days==1 ){ // the last day
                         int tempStart[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),0,0 };
                         int tempEnd[]={ c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),temp.getEndHour(),0 };
+                        if (temp.getEndHour() == 0)
+                        {
+                            c.add(Calendar.DAY_OF_MONTH,-1);
+                            tempEnd[0] = c.get(Calendar.YEAR);
+                            tempEnd[1] = c.get(Calendar.MONTH)+1;
+                            tempEnd[2] = c.get(Calendar.DAY_OF_MONTH);
+                            tempEnd[3] = 24;
+                        }
                         cutEvents.setStartDate(tempStart);
                         cutEvents.setEndDate(tempEnd);
                     }
@@ -320,7 +339,7 @@ public class MixEventDAO {
                     if( remainDoHour==0 ) break;
                 }
                 // find the next day
-                calendar.add(Calendar.DAY_OF_YEAR,1);
+                calendar.add(Calendar.DAY_OF_MONTH,1);
             }
         }
 
@@ -386,10 +405,11 @@ public class MixEventDAO {
         return fatherEvent;
     }
     public boolean[] getOneDayHourTime(int year,int month,int day){
+        //System.out.println("year="+year+" month="+month+" day="+day);
         boolean hours[]=new boolean[24];
         String sql="select * from "+tableName+
                 " where "+Col_Start_Year+"="+year+" and "+Col_Start_Month+"="+month+" and "+Col_Start_Day+"="+day;
-        Cursor result=database.rawQuery(sql,null);
+        Cursor result=database.rawQuery(sql, null);
 
         for(int i=0;i<24;i=i+1){
             if( i<6 ) hours[i] = false;
@@ -404,5 +424,301 @@ public class MixEventDAO {
         result.close();
 
         return hours;
+    }
+    // do by ja go
+    public ArrayList<Event> Schedule(ArrayList<Event> OriginData){
+        ArrayList<Event> Schedule_Data=new ArrayList<Event>(),WaitForSchedule=new ArrayList<Event>();
+        //先把固定的事件拿出來 OriginData會只剩下排程事件
+        for(int i=0;i<OriginData.size();i+=1){
+            Event t=OriginData.get(i);
+            t.setStartMonth(t.getStartMonth()-1);
+            t.setEndMonth(t.getEndMonth()-1);
+            if(OriginData.get(i).isStatic()){
+                Schedule_Data.add(OriginData.get(i));
+            }
+            else{
+                WaitForSchedule.add(OriginData.get(i));
+            }
+        }
+        Schedule_Data.clear();
+        if(WaitForSchedule.size()==0){
+            return Schedule_Data;
+        }
+        //找到排程事件中最早開始的時間點
+        Calendar Time=Calendar.getInstance(),CompareTime=Calendar.getInstance();
+        Event a=WaitForSchedule.get(0);
+        Time.set(a.getStartYear(), a.getStartMonth(), a.getStartDay(), a.getStartHour(), a.getStartMinute());
+        for(int i=1;i<WaitForSchedule.size();i+=1){
+            CompareTime.set(a.getStartYear(),a.getStartMonth(),a.getStartDay(),a.getStartHour(),a.getStartMinute());
+            if(!Time.before(CompareTime)){
+                Time.set(CompareTime.get(Calendar.YEAR),CompareTime.get(Calendar.MONTH),CompareTime.get(Calendar.DAY_OF_MONTH));
+            }
+        }
+        //開始排程
+        while(!AllEventFinished(WaitForSchedule)){
+            boolean Hour[]=this.getOneDayHourTime( Time.get(Calendar.YEAR),Time.get(Calendar.MONTH)+1,Time.get(Calendar.DAY_OF_MONTH) );
+            /*for(int i=0;i<24;i+=1){//找一天中有空的時間 0~6不排
+                if(i<6){
+                    Hour[i]=false;
+                }
+                else{
+                    //這邊Call判斷的函式 填入固定事件
+                    Hour[i]=true;
+                    //if(i==11)Hour[i]=false;
+                }
+            }*/
+            for(int i=6;i<24;i+=1){//最早從六點開始排
+                if(Hour[i]==true){
+                    Event Temp=new Event();
+                    Calendar Temp_EndTime=Calendar.getInstance();
+                    int ChosenPriorityId=-1,TempDoHour=1;
+                    for(int index=0;index<WaitForSchedule.size();index+=1){//找優先度最高的事件 同時是可以做的 紀錄優先度最高事件的ID
+                        Time.set(Calendar.HOUR_OF_DAY,i);
+                        Calendar StartTime=Calendar.getInstance(),EndTime=Calendar.getInstance();
+                        StartTime.clear();EndTime.clear();
+                        StartTime.set(WaitForSchedule.get(index).getStartYear(), WaitForSchedule.get(index).getStartMonth(), WaitForSchedule.get(index).getStartDay(), WaitForSchedule.get(index).getStartHour(), WaitForSchedule.get(index).getStartMinute());
+                        EndTime.set(WaitForSchedule.get(index).getEndYear(),WaitForSchedule.get(index).getEndMonth(),WaitForSchedule.get(index).getEndDay(),WaitForSchedule.get(index).getEndHour(),WaitForSchedule.get(index).getEndMinute());
+                        if(!StartTime.after(Time)){// 只判斷可做的時間到了沒     還沒判斷是不是超過結束時間 &&EndTime.after(Time)
+                            if(ChosenPriorityId==-1||Temp_EndTime.after(EndTime)){//這邊判斷優先度
+                                if(WaitForSchedule.get(index).getDoHours()!=0){
+                                    ChosenPriorityId=index;
+                                    Temp.setDoHours(WaitForSchedule.get(index).getDoHours());
+                                    Temp.setPreviousId(WaitForSchedule.get(index).getId());
+                                    Temp.setName(WaitForSchedule.get(index).getName());
+                                    Temp.setId(WaitForSchedule.get(index).getId());
+                                    Temp_EndTime=(Calendar)EndTime.clone();
+                                }
+                            }
+                        }
+                    }
+                    if(ChosenPriorityId==-1)continue;//如果沒有在這時間開始的事件或能做的事件時間都為0
+                    Temp.setDoHours(TempDoHour);//做一個新的事件 將做的時間先設成1
+                    WaitForSchedule.get(ChosenPriorityId).setDoHours(WaitForSchedule.get(ChosenPriorityId).getDoHours()-1);//將doHour-1
+                    int start[]={Time.get(Calendar.YEAR),Time.get(Calendar.MONTH),Time.get(Calendar.DAY_OF_MONTH),i,0};
+                    int end[]={Time.get(Calendar.YEAR),Time.get(Calendar.MONTH),Time.get(Calendar.DAY_OF_MONTH),i+1,0};
+                    Temp.setStartDate(start);
+
+                    //下面再從接下來的時間繼續找 (同時還要確認是同一事件 如果有其他優先度比較高的出現 //目前不會出現) 就先跳出 先把事件加入ArrayList
+                    int j;
+                    for(j=i+1;j<24;j+=1){
+                        if(WaitForSchedule.get(ChosenPriorityId).getDoHours()<=0){//doHour用完
+                            Temp.setDoHours(TempDoHour);
+                            end[3]=j;//設定結束時間的小時數
+                            Temp.setEndDate(end);
+                            Schedule_Data.add(Temp);
+                            break;
+                        }
+                        if (Hour[j] == true) {
+                            TempDoHour+=1;
+                            WaitForSchedule.get(ChosenPriorityId).setDoHours(WaitForSchedule.get(ChosenPriorityId).getDoHours()-1);//將doHour-1
+
+                        }
+                        else{//沒有連續的時間可以排  所以先加入ArrayList
+                            Temp.setDoHours(TempDoHour);
+                            end[3]=j;//設定結束時間的小時數
+                            Temp.setEndDate(end);
+                            Schedule_Data.add(Temp);
+                            break;
+                        }
+                    }
+                    if(j==24){//到晚上的排程都是OK的 要新增到ArrayList  ((23不會跳出 24才會跳出來
+                        Temp.setDoHours(TempDoHour);
+                        end[3]=j;//設定結束時間的小時數
+                        Temp.setEndDate(end);
+                        Schedule_Data.add(Temp);
+                        i=j;
+                    }
+                    else{//時間還沒做完(還沒到晚上23點) 繼續接下去做
+                        i=j;
+                    }
+                }
+            }
+            Time.add(Calendar.DAY_OF_MONTH,1);//一天做完後加一天
+        }
+        for(int i=0;i<Schedule_Data.size();i+=1){
+            Event t =Schedule_Data.get(i);
+            t.setStartMonth(t.getStartMonth()+1);
+            t.setEndMonth(t.getEndMonth()+1);
+        }
+        return Schedule_Data;
+    }
+    boolean AllEventFinished(ArrayList<Event> a){
+        for(int i=0;i<a.size();i+=1){
+            if(a.get(i).getDoHours()!=0){
+                return false;
+            }
+        }
+        return true;
+    }
+    // do by yun ja
+    public ArrayList<Event> ScheduleByYunJa(ArrayList<Event> OriginData) {
+        ArrayList<Event> Schedule_Data = new ArrayList<Event>(), WaitForSchedule = new ArrayList<Event>();
+        //先把固定的事件拿出來 OriginData會只剩下排程事件
+        for (int i = 0; i < OriginData.size(); i += 1)
+        {
+            if (OriginData.get(i).isStatic())
+            {
+                Schedule_Data.add(OriginData.get(i));
+            }
+            else
+            {
+                WaitForSchedule.add(OriginData.get(i));
+            }
+        }
+        Schedule_Data.clear();
+        if (WaitForSchedule.size() == 0)
+        {
+            return Schedule_Data;
+        }
+        //找到排程事件中最早開始的時間點
+        for (int i = 0; i < WaitForSchedule.size(); i++)
+        {
+            Event now = WaitForSchedule.get(i);
+            Calendar start = Calendar.getInstance(), end = Calendar.getInstance();
+            start.set(now.getStartYear(), now.getStartMonth() - 1, now.getStartDay(), now.getStartHour(), now.getStartMinute());
+            end.set(now.getEndYear(), now.getEndMonth() - 1, now.getEndDay(), now.getEndHour(), now.getEndMinute());
+            int millisecondsofhour = 1000 * 60 * 60;
+            long diff = (end.getTimeInMillis() - start.getTimeInMillis()) / millisecondsofhour;
+            WaitForSchedule.get(i).setTotalTime(diff);
+            long totaltime = WaitForSchedule.get(i).getTotalTime();
+            int doeventtime = WaitForSchedule.get(i).getDoHours();
+            WaitForSchedule.get(i).setPriority((double)totaltime / doeventtime);
+        }
+        Calendar Time = Calendar.getInstance(), CompareTime = Calendar.getInstance();
+        Event a = WaitForSchedule.get(0);
+        Time.set(a.getStartYear(), a.getStartMonth()-1, a.getStartDay(), a.getStartHour(), a.getStartMinute());
+        for (int i = 1; i < WaitForSchedule.size(); i += 1)
+        {
+            CompareTime.set(a.getStartYear(), a.getStartMonth()-1, a.getStartDay(), a.getStartHour(), a.getStartMinute());
+            if (!Time.before(CompareTime))
+            {
+                Time.set(CompareTime.get(Calendar.YEAR), CompareTime.get(Calendar.MONTH), CompareTime.get(Calendar.DAY_OF_MONTH));
+            }
+        }
+        while(!AllEventFinished(WaitForSchedule))
+        {
+            boolean Hour[] = this.getOneDayHourTime(Time.get(Calendar.YEAR),Time.get(Calendar.MONTH)+1,Time.get(Calendar.DAY_OF_MONTH));
+            /*for (int i = 0; i < 24; i += 1) {//找一天中有空的時間 0~6不排
+                if (i < 6) {
+                    Hour[i] = false;
+                } else {
+                    //這邊Call判斷的函式 填入固定事件
+                    Hour[i] = true;
+                }
+            }*/
+            for (int i = 6; i < 24; i += 1) {//最早從六點開始排
+                if (Hour[i] == true)
+                {
+                    Event Temp = new Event();
+                    int ChosenPriorityId = -1, TempDoHour = 1;
+                    for (int index = 0; index < WaitForSchedule.size(); index += 1)
+                    {//找優先度最高的事件 同時是可以做的 紀錄優先度最高事件的ID
+                        Time.set(Calendar.HOUR_OF_DAY, i);
+                        Calendar StartTime = Calendar.getInstance(), EndTime = Calendar.getInstance();
+                        StartTime.clear();
+                        EndTime.clear();
+                        StartTime.set(WaitForSchedule.get(index).getStartYear(), WaitForSchedule.get(index).getStartMonth() - 1, WaitForSchedule.get(index).getStartDay(), WaitForSchedule.get(index).getStartHour(), WaitForSchedule.get(index).getStartMinute());
+                        EndTime.set(WaitForSchedule.get(index).getEndYear(), WaitForSchedule.get(index).getEndMonth()-1 , WaitForSchedule.get(index).getEndDay(), WaitForSchedule.get(index).getEndHour(), WaitForSchedule.get(index).getEndMinute());
+                        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy / MM / dd HH");
+                        if (!StartTime.after(Time))
+                        {
+                            if (ChosenPriorityId == -1 || Temp.getPriority() > WaitForSchedule.get(index).getPriority()
+                                    || (Temp.getPriority() == WaitForSchedule.get(index).getPriority() && Temp.getTotalTime() > WaitForSchedule.get(index).getTotalTime())) //判斷優先度
+                            {
+                                if (WaitForSchedule.get(index).getDoHours() != 0)
+                                {
+                                    ChosenPriorityId = index;
+                                    Temp.setDoHours(WaitForSchedule.get(index).getDoHours());
+                                    Temp.setPreviousId(WaitForSchedule.get(index).getId());
+                                    Temp.setName(WaitForSchedule.get(index).getName());
+                                    Temp.setPriority(WaitForSchedule.get(index).getPriority());
+                                    Temp.setTotalTime(WaitForSchedule.get(index).getTotalTime());
+                                }
+                            }
+                        }
+                    }
+                    if (ChosenPriorityId == -1)
+                        continue;//如果沒有在這時間開始的事件或能做的事件時間都為0
+                    Temp.setDoHours(TempDoHour);//做一個新的事件 將做的時間先設成1
+                    WaitForSchedule.get(ChosenPriorityId).setDoHours(WaitForSchedule.get(ChosenPriorityId).getDoHours() - 1);
+                    int start[] = {Time.get(Calendar.YEAR), Time.get(Calendar.MONTH)+1, Time.get(Calendar.DAY_OF_MONTH), i, 0};
+                    int end[] = {Time.get(Calendar.YEAR), Time.get(Calendar.MONTH)+1, Time.get(Calendar.DAY_OF_MONTH), i + 1, 0};
+                    Temp.setStartDate(start);
+                    //下面再從接下來的時間繼續找 (同時還要確認是同一事件 如果有其他優先度比較高的出現 //目前不會出現) 就先跳出 先把事件加入ArrayList
+                    int j;
+                    for(j=i+1;j<24;j+=1)
+                    {
+                        boolean flag = false;
+                        for (int k = 0; k < WaitForSchedule.size(); k++)
+                        {
+                            Event event = WaitForSchedule.get(k);
+                            Calendar now = Calendar.getInstance();
+                            now.set(event.getStartYear(), event.getStartMonth(), event.getStartDay(), event.getStartHour(), event.getStartMinute());
+                            if (now.before(Time) && WaitForSchedule.get(k).getDoHours() > 0)
+                            {
+                                long totaltime = WaitForSchedule.get(k).getTotalTime();
+                                totaltime--;
+                                WaitForSchedule.get(k).setTotalTime(totaltime);
+                                int doeventtime = WaitForSchedule.get(k).getDoHours();
+                                WaitForSchedule.get(k).setPriority((double)totaltime / doeventtime);
+                                if (WaitForSchedule.get(ChosenPriorityId).getPriority() > WaitForSchedule.get(k).getPriority())
+                                    flag = true;
+                            }
+                        }
+
+                        if(WaitForSchedule.get(ChosenPriorityId).getDoHours()<=0 || flag == true)
+                        {//doHour用完
+                            Temp.setDoHours(TempDoHour);
+                            end[3]=j;
+                            Temp.setEndDate(end);
+                            Schedule_Data.add(Temp);
+                            break;
+                        }
+                        if (Hour[j] == true)
+                        {
+                            TempDoHour+=1;
+                            WaitForSchedule.get(ChosenPriorityId).setDoHours(WaitForSchedule.get(ChosenPriorityId).getDoHours() - 1);//將doHour-1
+                        }
+                        else
+                        {//沒有連續的時間可以排  所以先加入ArrayList
+                            Temp.setDoHours(TempDoHour);
+                            end[3]=j;
+                            Temp.setEndDate(end);
+                            Schedule_Data.add(Temp);
+                            break;
+                        }
+                    }
+                    if(j==24)
+                    {//到晚上的排程都是OK的 要新增到ArrayList
+                        Temp.setDoHours(TempDoHour);
+                        end[3]=j;//設定結束時間的小時數
+                        Temp.setEndDate(end);
+                        Schedule_Data.add(Temp);
+                        i=j;
+                    }
+                    else
+                    {//時間還沒做完(還沒到晚上24點) 繼續接下去做
+                        i=j-1;
+                    }
+                }
+            }
+            Time.add(Calendar.DAY_OF_MONTH,1);//一天做完後加一天
+            Time.set(Calendar.HOUR_OF_DAY, 0);
+            for (int k = 0; k < WaitForSchedule.size(); k++)
+            {
+                Event event = WaitForSchedule.get(k);
+                Calendar now = Calendar.getInstance();
+                now.set(event.getStartYear(), event.getStartMonth(), event.getStartDay(), event.getStartHour(), event.getStartMinute());
+                for (int l = 0; l < 6; l ++)
+                {
+                    if (now.before(Time) && WaitForSchedule.get(k).getDoHours() > 0)
+                    {
+                        WaitForSchedule.get(k).setTotalTime(WaitForSchedule.get(k).getTotalTime() - 1);
+                    }
+                }
+                WaitForSchedule.get(k).setPriority((double)WaitForSchedule.get(k).getTotalTime() / WaitForSchedule.get(k).getDoHours());
+            }
+        }
+        return Schedule_Data;
     }
 }
