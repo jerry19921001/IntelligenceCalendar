@@ -270,10 +270,6 @@ public class MainActivity extends ActionBarActivity {
                 day_list.putExtras(data);
                 startActivity(day_list);
                 break;
-            case R.id.TestOption:
-                Intent goToTestPage=new Intent(MainActivity.this,modify_event.class);
-                startActivity(goToTestPage);
-                break;
             case R.id.action_settings:
                 Intent goToUserPage=new Intent( MainActivity.this,UserPage.class );
                 startActivity(goToUserPage);

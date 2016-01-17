@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100"
-         app:showAsAction="never" />
+        app:showAsAction="never" />
     <item
         android:id="@+id/changeMode"
         android:title="changeMode">
@@ -20,7 +20,7 @@
             </item>
         </menu>
 
-     </item>
+    </item>
     <item
         android:id="@+id/New_Event"
         android:icon = "@drawable/pulse1"
@@ -38,9 +38,5 @@
         android:icon = "@drawable/home"
         app:showAsAction="always"
         android:title = "Today">
-    </item>
-    <item
-        android:id="@+id/TestOption"
-        android:title="TestOption">
     </item>
 </menu>
