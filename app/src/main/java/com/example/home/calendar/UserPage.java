@@ -10,12 +10,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 public class UserPage extends ActionBarActivity {
 
-    private Spinner lunchStartTime,lunchEndTime,dinnerStartTime,dinnerEndTime,sleepStartTime,sleepEndTime;
+    //private Spinner lunchStartTime,lunchEndTime,dinnerStartTime,dinnerEndTime,sleepStartTime,sleepEndTime;
     private SharedPreferences pref=null;
     private String[] list={ "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24" };
 
@@ -66,12 +65,12 @@ public class UserPage extends ActionBarActivity {
             }
             break;
             case R.id.OK: {
-                int id1=lunchStartTime.getSelectedItemPosition();
+                /*int id1=lunchStartTime.getSelectedItemPosition();
                 int id2 = lunchEndTime.getSelectedItemPosition();
                 int id3=dinnerStartTime.getSelectedItemPosition();
                 int id4=dinnerEndTime.getSelectedItemPosition();
                 int id5=sleepStartTime.getSelectedItemPosition();
-                int id6=sleepEndTime.getSelectedItemPosition();
+                int id6=sleepEndTime.getSelectedItemPosition();*/
                 RadioGroup StartDayofWeek = (RadioGroup) findViewById(R.id.StartDayOfWeek);
                 switch(StartDayofWeek.getCheckedRadioButtonId())
                 {
@@ -82,12 +81,12 @@ public class UserPage extends ActionBarActivity {
                         pref.edit().putInt("StartDayOfWeek", 1).commit();
                         break;
                 }
-                pref.edit().putInt("lunchStartTimeId",id1).commit();
+                /*pref.edit().putInt("lunchStartTimeId",id1).commit();
                 pref.edit().putInt("lunchEndTimeId",id2).commit();
                 pref.edit().putInt("dinnerStartTimeId",id3).commit();
                 pref.edit().putInt("dinnerEndTimeId",id4).commit();
                 pref.edit().putInt("sleepStartTime",id5).commit();
-                pref.edit().putInt("sleepEndTime",id6).commit();
+                pref.edit().putInt("sleepEndTime",id6).commit();*/
                 Toast t=Toast.makeText(getApplicationContext(),"Your user setting has been saved",Toast.LENGTH_SHORT);
                 t.show();
                 Intent RestartMainPage=new Intent( UserPage.this, MainActivity.class );
@@ -101,30 +100,30 @@ public class UserPage extends ActionBarActivity {
         ArrayAdapter<String> listAdapter=new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,list);
         RadioButton sun = (RadioButton) findViewById(R.id.Sunday);
         RadioButton mon = (RadioButton) findViewById(R.id.Monday);
-        lunchStartTime=(Spinner)findViewById(R.id.startLunchTime);
+        /*lunchStartTime=(Spinner)findViewById(R.id.startLunchTime);
         lunchEndTime=(Spinner)findViewById(R.id.endLunchTime);
         dinnerStartTime=(Spinner)findViewById(R.id.startDinnerTime);
         dinnerEndTime=(Spinner)findViewById(R.id.endDinnerTime);
         sleepStartTime=(Spinner)findViewById(R.id.startSleepTime);
-        sleepEndTime=(Spinner)findViewById(R.id.wakeUpTime);
+        sleepEndTime=(Spinner)findViewById(R.id.wakeUpTime);*/
 
         listAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        lunchStartTime.setAdapter(listAdapter);
+        /*lunchStartTime.setAdapter(listAdapter);
         lunchEndTime.setAdapter(listAdapter);
         dinnerStartTime.setAdapter(listAdapter);
         dinnerEndTime.setAdapter(listAdapter);
         sleepStartTime.setAdapter(listAdapter);
-        sleepEndTime.setAdapter(listAdapter);
+        sleepEndTime.setAdapter(listAdapter);*/
 
         pref=getSharedPreferences("UserSetting",0);//get an object of preference
 
-        lunchStartTime.setSelection(pref.getInt("lunchStartTimeId",0));
+        /*lunchStartTime.setSelection(pref.getInt("lunchStartTimeId",0));
         lunchEndTime.setSelection(pref.getInt("lunchEndTimeId",0));
         dinnerStartTime.setSelection(pref.getInt("dinnerStartTimeId",0));
         dinnerEndTime.setSelection(pref.getInt("dinnerEndTimeId",0));
         sleepStartTime.setSelection(pref.getInt("sleepStartTime",0));
-        sleepEndTime.setSelection(pref.getInt("sleepEndTime",5));
+        sleepEndTime.setSelection(pref.getInt("sleepEndTime",5));*/
         if(pref.getInt("StartDayOfWeek", 0) == 7)
         {
             sun.setChecked(true);

@@ -274,7 +274,7 @@ public class MainActivity extends ActionBarActivity {
                 Intent goToTestPage=new Intent(MainActivity.this,modify_event.class);
                 startActivity(goToTestPage);
                 break;
-            case R.id.User:
+            case R.id.action_settings:
                 Intent goToUserPage=new Intent( MainActivity.this,UserPage.class );
                 startActivity(goToUserPage);
                 MainActivity.this.finish();

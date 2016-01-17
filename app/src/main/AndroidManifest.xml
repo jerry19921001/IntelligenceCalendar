@@ -4,7 +4,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/playstore_icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
@@ -24,8 +24,8 @@
             android:name=".UserPage"
             android:label="@string/title_activity_user_page" >
         </activity>
-        <activity android:name = ".SchedulePage" />
-        <activity android:name = ".Scheduling" />
+        <activity android:name=".Scheduling"/>
+        <activity android:name=".SchedulePage"/>
     </application>
 
 </manifest>

@@ -43,8 +43,4 @@
         android:id="@+id/TestOption"
         android:title="TestOption">
     </item>
-    <item
-        android:id="@+id/User"
-        android:title="User">
-    </item>
 </menu>
