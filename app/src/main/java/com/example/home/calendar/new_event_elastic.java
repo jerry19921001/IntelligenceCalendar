@@ -12,8 +12,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.ParseException;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,6 +23,7 @@ public class new_event_elastic extends commonOperation {
 
     private Toast toast;
     private EventsDao EventDb=null;
+    private MixEventDAO mixEventDAO=null;
     private CheckBox isElastic;
     private EditText time;
     boolean checked=true;
@@ -69,6 +68,7 @@ public class new_event_elastic extends commonOperation {
         }
 
         EventDb=new EventsDao(this);
+        mixEventDAO=new MixEventDAO(this);
         updateDisplay();
         selectTime();
     }
@@ -105,10 +105,9 @@ public class new_event_elastic extends commonOperation {
             return true;
         }
     }
-    public void OnClickButton(View Event)
-    {
+    public void OnClickButton(View Event) {
         if(Event.getId()== R.id.back) {//   cancel
-            EventDb.Close();
+            //EventDb.Close();
             new_event_elastic.this.finish();
         }
         else if (Event.getId() == R.id.finish) {//  OK
@@ -165,7 +164,10 @@ public class new_event_elastic extends commonOperation {
                             toast = Toast.makeText(getApplication(), event.getName() + " has been saved", Toast.LENGTH_SHORT);
                             toast.show();
                         }
-                        EventDb.Close();
+
+                        //mixEventDAO.DeleteAll();
+                        //mixEventDAO.InsertStaticEvents();
+
                         new_event_elastic.this.finish();
                     }
 

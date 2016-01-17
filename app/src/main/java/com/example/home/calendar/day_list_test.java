@@ -37,7 +37,7 @@ public class day_list_test extends ActionBarActivity {
 
         db=new EventsDao(this);
         ArrayList<Event> data=db.GetOneDayEvents(Y, M, D);
-        db.Close();
+        //db.Close();
 
         System.out.println("close db");
         this.setTitle("Day Event");

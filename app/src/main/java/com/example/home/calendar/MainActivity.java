@@ -5,12 +5,6 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
@@ -22,9 +16,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListPopupWindow;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.roomorama.caldroid.CaldroidFragment;
@@ -35,10 +26,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 
 public class MainActivity extends ActionBarActivity {
     private MixEventDAO database=null;
+    private EventsDao e=null;
+    //private SharedPreferences pref=null;
     CaldroidSampleCustomFragment caldroidFragment = new CaldroidSampleCustomFragment();
     Bundle args = new Bundle();
     Date lastday=new Date();
@@ -159,7 +151,11 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //database = new MixEventDAO(this);
+
+        database=new MixEventDAO(this);
+        e=new EventsDao(this);
+        //pref=getSharedPreferences("UserSetting",0);
+
         setContentView(R.layout.activity_main);
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
@@ -192,16 +188,28 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        database=new MixEventDAO(this);
+
         database.DeleteAll();
         database.InsertStaticEvents();
-        //database.Sort();
-        //database.Close();
-        try {
+        switch( settings.getInt("sortAlgorithm_ID",0) ){
+            case 1:
+                database.Sort();
+                break;
+            case 2:
+                database.InsertFromArrayList( database.Schedule( e.AllEvents() ) );
+                break;
+            case 3:
+                database.InsertFromArrayList( database.ScheduleByYunJa( e.AllEvents() ) );
+                break;
+            default:
+                database.Sort();
+                break;
+        }
+        /*try {
             SetNotify();
         } catch (ParseException e) {
             e.printStackTrace();
-        }
+        }*/
         caldroidFragment.refreshView();
         //shownowevent(lastday);
     }
@@ -236,8 +244,10 @@ public class MainActivity extends ActionBarActivity {
                 lastview_click = false;
                 break;
             case R.id.Sort_Event:
-                Intent sort = new Intent(MainActivity.this, SchedulePage.class);
-                startActivity(sort);
+                Intent intent=new Intent(MainActivity.this,SchedulePage.class);
+                startActivity(intent);
+                lastview = null;
+                lastview_click = false;
                 break;
             case R.id.Today:
                 caldroidFragment.moveToDate(cal.getTime());
@@ -274,7 +284,7 @@ public class MainActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    void SetNotify() throws ParseException {
+    /*void SetNotify() throws ParseException {
         Calendar c=Calendar.getInstance();// get the year ,the month ,and the day
         int year=c.get(Calendar.YEAR);
         int month=c.get( Calendar.MONTH )+1;
@@ -302,5 +312,12 @@ public class MainActivity extends ActionBarActivity {
             NotificationManager manage=(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
             manage.notify(i,n);
         }
+    }*/
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        database.Close();
+        e.Close();
     }
 }
