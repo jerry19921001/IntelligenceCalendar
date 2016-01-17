@@ -28,6 +28,7 @@ public class EventsDao {
     public static final String Col_Is_Static="Is_Static";// 11 int (1:static : 0:dynamic)
     public static final String Col_Blocks="Blocks";// 12 int
     public static final String Col_Inside_MixEventDAO="Inside";// 13 int (1:inside : 0:not inside)
+    public static final String Col_Total_Time="Total_Time";// 14 long
     // the string of create table
     public static final String Create_Table="Create Table "+Table_Name+" ( "+
             Key_Id+" Integer Primary Key AUTOINCREMENT, "+
@@ -43,7 +44,8 @@ public class EventsDao {
             Col_Do_Hour+" Integer Not Null, "+
             Col_Is_Static+" Integer Not Null, "+
             Col_Blocks+" Integer Not Null, "+
-            Col_Inside_MixEventDAO+" Integer Not Null "+
+            Col_Inside_MixEventDAO+" Integer Not Null, "+
+            Col_Total_Time+" Integer "+
             " ); ";
     // the database
     private SQLiteDatabase db=null;
@@ -73,6 +75,7 @@ public class EventsDao {
         else cv.put( Col_Is_Static,0 );
         cv.put( Col_Blocks,event.getBlocks() );
         cv.put(Col_Inside_MixEventDAO,0);
+        cv.put( Col_Total_Time,event.getTotalTime() );
 
         long id=db.insert( Table_Name,null,cv );
 
@@ -122,6 +125,7 @@ public class EventsDao {
             temp.setDoHours(c.getInt(10));
             temp.setIsStatic(c.getInt(11));
             temp.setBlocks( c.getInt(12) );
+            temp.setTotalTime( c.getLong(14) );
 
             oneDayEvents.add(temp);
         }
@@ -144,6 +148,7 @@ public class EventsDao {
             temp.setDoHours(c.getInt(10));
             temp.setIsStatic(c.getInt(11));
             temp.setBlocks( c.getInt(12) );
+            temp.setTotalTime( c.getLong(14) );
 
             Events.add(temp);
         }
@@ -163,6 +168,7 @@ public class EventsDao {
         e.setDoHours(result.getInt(10));
         e.setIsStatic(result.getInt(11));
         e.setBlocks(result.getInt(12));
+        e.setTotalTime( result.getLong(14) );
 
         result.close();
 

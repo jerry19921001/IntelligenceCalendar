@@ -255,8 +255,8 @@ public class MainActivity extends ActionBarActivity {
                 {
                     caldroidFragment.setBackgroundResourceForDate(R.color.white, lastday);
                     caldroidFragment.setBackgroundResourceForDate(R.drawable.red_border, date_today);
-                    lastday = null;
                     //shownowevent(date_today);
+                    lastday = date_today;
                     caldroidFragment.refreshView();
                 }
                 break;

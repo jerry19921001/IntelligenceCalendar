@@ -119,14 +119,26 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 			if (data.get(0).isStatic())
 				tv2.setBackgroundResource(R.color.pink);
 			else
-				tv2.setBackgroundResource(R.color.light_blue);
+			{
+				System.out.println("B "+data.get(0).getTotalTime());
+				if(data.get(0).getTotalTime() < 0)
+					tv2.setBackgroundResource(R.color.red);
+				else
+					tv2.setBackgroundResource(R.color.light_blue);
+			}
 			tv2.setText(data.get(0).getName());
 			if (data.size() > 1)
 			{
 				if (data.get(1).isStatic())
 					tv3.setBackgroundResource(R.color.pink);
 				else
-					tv3.setBackgroundResource(R.color.light_blue);
+				{
+					System.out.println("B "+data.get(1).getTotalTime());
+					if (data.get(1).getTotalTime() < 0)
+						tv3.setBackgroundResource(R.color.red);
+					else
+						tv3.setBackgroundResource(R.color.light_blue);
+				}
 				tv3.setText(data.get(1).getName());
 			}
 			if (data.size() > 2)
@@ -134,7 +146,13 @@ public class CaldroidSampleCustomAdapter extends CaldroidGridAdapter {
 				if (data.get(2).isStatic())
 					tv4.setBackgroundResource(R.color.pink);
 				else
-					tv4.setBackgroundResource(R.color.light_blue);
+				{
+					System.out.println("B "+data.get(2).getTotalTime());
+					if (data.get(2).getTotalTime() < 0)
+						tv4.setBackgroundResource(R.color.red);
+					else
+						tv4.setBackgroundResource(R.color.light_blue);
+				}
 				tv4.setText(data.get(2).getName());
 			}
 		}

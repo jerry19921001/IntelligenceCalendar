@@ -32,6 +32,7 @@ public class MixEventDAO {
     public static final String Col_Do_Hour="Do_Hour";// 11 int
     public static final String Col_Is_Static="Is_Static";// 12 int
     public static final String Col_No="No";// 13 int
+    public static final String Col_Total_time="Total_Time";//14 long
     //string : create table
     public static final String CreateTable="Create Table "+tableName+" ( "+
             Key+" Integer Primary Key AUTOINCREMENT, "+
@@ -47,7 +48,8 @@ public class MixEventDAO {
             Col_Previous_Id_From_EventDAO+" Integer Not Null, "+
             Col_Do_Hour+" Integer Not Null, "+
             Col_Is_Static+" Integer Not Null, "+
-            Col_No+" Integer Not Null "+
+            Col_No+" Integer Not Null, "+
+            Col_Total_time+" Integer "+
             " ); ";
     //the database
     static SQLiteDatabase database=null;
@@ -76,6 +78,7 @@ public class MixEventDAO {
         if( e.isStatic() ) cv.put(Col_Is_Static,1);
         else cv.put(Col_Is_Static,0);
         cv.put(Col_No,e.getNo());
+        cv.put( Col_Total_time,e.getTotalTime() );
 
         long id=database.insert(tableName, null, cv);
 
@@ -380,6 +383,7 @@ public class MixEventDAO {
             temp.setPreviousId(result.getLong(10));
             temp.setDoHours(result.getInt(11));
             temp.setIsStatic(result.getInt(12));
+            temp.setTotalTime( result.getLong(14) );
 
             events.add(temp);
         }
@@ -490,18 +494,13 @@ public class MixEventDAO {
             }
         }
         //開始排程
-        System.out.println("Start Schedule");
+        //System.out.println("Start Schedule");
         Calendar BlockTime=Calendar.getInstance();BlockTime.clear();
-        int BlockID=-1;
         while(!AllEventFinished(WaitForSchedule)){
             boolean Hour[]=this.getOneDayHourTime( Time.get(Calendar.YEAR),Time.get(Calendar.MONTH)+1,Time.get(Calendar.DAY_OF_MONTH) );//得到固定事件所佔的時間
 
-            System.out.println("First loop");
+            //System.out.println("First loop");
             for(int i=6;i<24;i+=1){//最早從六點開始排
-                if(Time.after(BlockTime)&&Time.before(BlockTime)){
-                    WaitForSchedule.get(BlockID).setBlocks(0);
-                    BlockID=-1;
-                }
                 if(Hour[i]==true) {
 
                     int ChosenPriorityId, TempDoHour = 1;
@@ -513,13 +512,12 @@ public class MixEventDAO {
                         }
                         continue;//如果沒有在這時間開始的事件或能做的事件時間都為0
                     }
-                    System.out.println("over continue");
-                    System.out.println("Event:"+WaitForSchedule.get(ChosenPriorityId).getName()+" do:"+WaitForSchedule.get(ChosenPriorityId).getDoHours());
+
                     //這邊開始做交換的事
-                    Calendar Temp_EndTime=Calendar.getInstance();Temp_EndTime.clear();
+                    Calendar Temp_EndTime=Calendar.getInstance();Temp_EndTime.clear();//WaitForSchedule.get(ChosenPriorityId) 結束時間
                     Temp_EndTime.set((WaitForSchedule.get(ChosenPriorityId).getEndYear()),WaitForSchedule.get(ChosenPriorityId).getEndMonth(),WaitForSchedule.get(ChosenPriorityId).getEndDay(),WaitForSchedule.get(ChosenPriorityId).getEndHour(),WaitForSchedule.get(ChosenPriorityId).getEndMinute());
                     int ChangeID=-1;
-                    Calendar ExchangeEventStartTime=Calendar.getInstance();ExchangeEventStartTime.clear();
+                    Calendar ExchangeEventStartTime=Calendar.getInstance();ExchangeEventStartTime.clear();//WaitForSchedule.get(ChosenPriorityId) 開始時間
                     ExchangeEventStartTime.set(WaitForSchedule.get(ChosenPriorityId).getStartYear(), WaitForSchedule.get(ChosenPriorityId).getStartMonth(), WaitForSchedule.get(ChosenPriorityId).getStartDay(), WaitForSchedule.get(ChosenPriorityId).getStartHour(), WaitForSchedule.get(ChosenPriorityId).getStartMinute());
 
                     Calendar ttemp=Calendar.getInstance();ttemp.clear();
@@ -529,7 +527,7 @@ public class MixEventDAO {
                     if(Temp_EndTime.before(Time)||ttemp.after(Temp_EndTime)){//延遲
                         //進行交換事件
                         Calendar CompareCal=Calendar.getInstance();
-                        System.out.println("Start Exchange");
+                        //System.out.println("Start Exchange");
                         int MaxDoHours=WaitForSchedule.get(ChosenPriorityId).getDoHours();
                         for(int k=Schedule_Data.size()-1;k>=0;k-=1){
                             //Schedule_Data k-1 的開始時間
@@ -543,12 +541,9 @@ public class MixEventDAO {
                             }
                         }
                     }
-                    System.out.println("ID:"+ChangeID);
-                    System.out.println("Ssize:" + Schedule_Data.size());
-                    System.out.println("Wsize:" +WaitForSchedule.size());
 
                     //修改
-                    if(ChangeID!=-1) {//事件延遲且有事件可以替換
+                    if(ChangeID!=-1&&WaitForSchedule.get(ChosenPriorityId).getBlocks()!=1) {//事件延遲且有事件可以替換
                         int x=-1;
                         for(int w=0;w<WaitForSchedule.size();w+=1){//找原本在waitforschedule裡的index
                             if (WaitForSchedule.get(w).getId()==Schedule_Data.get(ChangeID).getId()){
@@ -560,30 +555,27 @@ public class MixEventDAO {
                             Event ReplaceEvent = new Event();
                             Event b = WaitForSchedule.get(ChosenPriorityId);
                             Event c = Schedule_Data.get(ChangeID);
-                            WaitForSchedule.get(ChosenPriorityId);
+
                             ReplaceEvent.setName(b.getName());
                             ReplaceEvent.setId(b.getId());
                             ReplaceEvent.setPreviousId(b.getId());
                             ReplaceEvent.setStartDate(Schedule_Data.get(ChangeID).getStartYear(), Schedule_Data.get(ChangeID).getStartMonth(), Schedule_Data.get(ChangeID).getStartDay(), Schedule_Data.get(ChangeID).getStartHour(), Schedule_Data.get(ChangeID).getStartMinute());
                             ReplaceEvent.setEndDate(Schedule_Data.get(ChangeID).getStartYear(), Schedule_Data.get(ChangeID).getStartMonth(), Schedule_Data.get(ChangeID).getStartDay(), Schedule_Data.get(ChangeID).getStartHour() + WaitForSchedule.get(ChosenPriorityId).getDoHours(), Schedule_Data.get(ChangeID).getStartMinute());
                             ReplaceEvent.setDoHours(WaitForSchedule.get(ChosenPriorityId).getDoHours());
-                            //從以下開始會對排程進行改變
-
 
                             int index_in_WaitForSchedule = 0;
                             for (int w = 0; w < WaitForSchedule.size(); w += 1) {//找原本在waitforschedule裡的index
-                                if (WaitForSchedule.get(w).getId() == Schedule_Data.get(ChangeID).getId()) {
+                                if (WaitForSchedule.get(w).getId() == c.getId()) {
                                     index_in_WaitForSchedule = w;
                                     break;
                                 }
                             }
-
+                            int FreeTime=c.getDoHours()-b.getDoHours();
+                            //從以下開始會對排程進行改變
                             WaitForSchedule.get(index_in_WaitForSchedule).setDoHours(WaitForSchedule.get(index_in_WaitForSchedule).getDoHours() + Schedule_Data.get(ChangeID).getDoHours());//還原砍掉事件本來的doHour
-                            System.out.println("recover doHour:" + WaitForSchedule.get(index_in_WaitForSchedule).getDoHours());
-                            WaitForSchedule.get(index_in_WaitForSchedule).setBlocks(1);//借用Block當作不能使用
                             b.setDoHours(0);//對新增事件的doHours進行修改
 
-                            for (int l = 0; l < WaitForSchedule.size(); l += 1) {
+                            /*for (int l = 0; l < WaitForSchedule.size(); l += 1) {
                                 System.out.print(WaitForSchedule.get(l).getName() + " d" + WaitForSchedule.get(l).getDoHours() + " ");
                             }
                             System.out.println();
@@ -595,34 +587,33 @@ public class MixEventDAO {
                             System.out.println("Name" + ReplaceEvent.getName());
                             System.out.println("Start:" + ReplaceEvent.getStartYear() + " " + ReplaceEvent.getStartMonth() + " " + ReplaceEvent.getStartDay() + " " + ReplaceEvent.getStartHour() + " " + ReplaceEvent.getStartMinute());
                             System.out.println("End:" + ReplaceEvent.getEndYear() + " " + ReplaceEvent.getEndMonth() + " " + ReplaceEvent.getEndDay() + " " + ReplaceEvent.getEndHour() + " " + ReplaceEvent.getEndMinute());
+
                             Schedule_Data.remove(ChangeID);
                             Schedule_Data.add(ChangeID, ReplaceEvent);
-                            System.out.println("ChangID:" + (ChangeID + 1) + " S_D:size:" + Schedule_Data.size());
 
+                            System.out.println("NewEvent StartTime"+ReplaceEvent.getEndYear() + " " + ReplaceEvent.getEndMonth() + " " + ReplaceEvent.getEndDay()+" "+ReplaceEvent.getEndHour()+" "+ReplaceEvent.getEndMinute());
 
-                            for (int l = ChangeID + 1; l < Schedule_Data.size(); l += 1) {//對所有再砍掉事件後面的事件進行刪除
-                                System.out.println(l);
-                                for (int w = 0; w < WaitForSchedule.size(); w += 1) {//找原本在waitforschedule裡的index
-                                    if (WaitForSchedule.get(w).getId() == Schedule_Data.get(l).getId()) {
-                                        index_in_WaitForSchedule = w;
-                                        break;
-                                    }
-                                }
-                                WaitForSchedule.get(index_in_WaitForSchedule).setDoHours(WaitForSchedule.get(index_in_WaitForSchedule).getDoHours() + Schedule_Data.get(l).getDoHours());
-                            }
-                            for (int l = 0; l < WaitForSchedule.size(); l += 1) {
-                                System.out.print(WaitForSchedule.get(l).getName() + " d" + WaitForSchedule.get(l).getDoHours() + " ");
-                            }
-                            System.out.println();
-                            while (Schedule_Data.size() > ChangeID + 1) {
-                                Schedule_Data.remove(Schedule_Data.size() - 1);
-                            }
-                            //紀錄Block存活時間
-                            BlockTime = (Calendar) Time.clone();
-                            BlockID = index_in_WaitForSchedule;
-                            Time.set(ReplaceEvent.getEndYear(), ReplaceEvent.getEndMonth(), ReplaceEvent.getEndDay(), ReplaceEvent.getEndHour(), ReplaceEvent.getEndMinute());
-                            i = ReplaceEvent.getEndHour() - 1;
-                            System.out.println("Out from do DelayEvent, now Time:" + Time.get(Calendar.YEAR) + " " + Time.get(Calendar.MONTH) + " " + Time.get(Calendar.DAY_OF_MONTH) + " " + Time.get(Calendar.HOUR_OF_DAY));
+                            System.out.println("FreeTime="+FreeTime);*/
+
+                            //下面處理剩餘時間
+
+                            Event FillEvent=new Event();
+                            FillEvent.setId(WaitForSchedule.get(index_in_WaitForSchedule).getId());
+                            FillEvent.setName(WaitForSchedule.get(index_in_WaitForSchedule).getName());
+                            FillEvent.setPreviousId(WaitForSchedule.get(index_in_WaitForSchedule).getId());
+                            FillEvent.setStartDate(ReplaceEvent.getEndYear(), ReplaceEvent.getEndMonth(), ReplaceEvent.getEndDay(), ReplaceEvent.getEndHour(), ReplaceEvent.getEndMinute());
+                            FillEvent.setEndDate(ReplaceEvent.getEndYear(), ReplaceEvent.getEndMonth(), ReplaceEvent.getEndDay(), ReplaceEvent.getEndHour() + FreeTime, ReplaceEvent.getEndMinute());
+                            FillEvent.setDoHours(FreeTime);
+
+                            Schedule_Data.add(FillEvent);
+                            //System.out.println("FreeTime="+FreeTime);
+                            WaitForSchedule.get(index_in_WaitForSchedule).setDoHours(WaitForSchedule.get(index_in_WaitForSchedule).getDoHours() - FreeTime);
+                            WaitForSchedule.get(index_in_WaitForSchedule).setBlocks(1);
+
+                            //
+
+                            i-=1;
+                            Time.add(Calendar.HOUR_OF_DAY,-1);
                             continue;
                         }
                     }
@@ -642,7 +633,7 @@ public class MixEventDAO {
                     Temp.setStartDate(start);
 
                     //下面再從接下來的時間繼續找 同時還要確認是同一事件 如果有其他優先度比較高的出現  就先跳出 先把事件加入ArrayList
-                    System.out.println("Continuing making Event");
+                    //System.out.println("Continuing making Event");
                     int j,BestID;
                     for(j=i+1;j<24;j+=1){
                         Time.add(Calendar.HOUR_OF_DAY,1);
@@ -691,10 +682,10 @@ public class MixEventDAO {
             t.setStartMonth(t.getStartMonth()+1);
             t.setEndMonth(t.getEndMonth()+1);
         }
-        for(int g=0;g<Schedule_Data.size();g+=1){
+        /*for(int g=0;g<Schedule_Data.size();g+=1){
             System.out.print(g + ":" + Schedule_Data.get(g).getName() + " ");
         }
-        System.out.println("Go out");
+        System.out.println("Go out");*/
         return Schedule_Data;
     }
     boolean AllEventFinished(ArrayList<Event> a){
@@ -809,6 +800,8 @@ public class MixEventDAO {
                             Temp.setDoHours(TempDoHour);
                             end[3] = j;
                             Temp.setEndDate(end);
+                            Temp.setTotalTime(WaitForSchedule.get(ChosenPriorityId).getTotalTime());
+                            System.out.println("A " + Temp.getTotalTime());
                             Schedule_Data.add(Temp);
                             break;
                         }
@@ -829,6 +822,8 @@ public class MixEventDAO {
                             Temp.setDoHours(TempDoHour);
                             end[3] = j;
                             Temp.setEndDate(end);
+                            Temp.setTotalTime(WaitForSchedule.get(ChosenPriorityId).getTotalTime());
+                            System.out.println("A "+Temp.getTotalTime());
                             Schedule_Data.add(Temp);
                             break;
                         }
@@ -837,10 +832,26 @@ public class MixEventDAO {
                         Temp.setDoHours(TempDoHour);
                         end[3] = j;//設定結束時間的小時數
                         Temp.setEndDate(end);
+                        Temp.setTotalTime(WaitForSchedule.get(ChosenPriorityId).getTotalTime());
+                        System.out.println("A "+Temp.getTotalTime());
                         Schedule_Data.add(Temp);
                         i = j;
                     } else {//時間還沒做完(還沒到晚上24點) 繼續接下去做
                         i = j - 1;
+                    }
+                }
+                else
+                {
+                    for (int index = 0; index < WaitForSchedule.size(); index += 1)
+                    {
+                        Calendar StartTime = Calendar.getInstance();
+                        StartTime.clear();
+                        StartTime.set(WaitForSchedule.get(index).getStartYear(), WaitForSchedule.get(index).getStartMonth(), WaitForSchedule.get(index).getStartDay(), WaitForSchedule.get(index).getStartHour(), WaitForSchedule.get(index).getStartMinute());
+                        if (!StartTime.after(Time))
+                        {
+                            WaitForSchedule.get(index).setTotalTime(WaitForSchedule.get(index).getTotalTime() - 1);
+                            WaitForSchedule.get(index).setPriority((double) WaitForSchedule.get(index).getTotalTime() / WaitForSchedule.get(index).getDoHours());
+                        }
                     }
                 }
             }
