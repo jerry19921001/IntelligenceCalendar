@@ -11,19 +11,19 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="EDD(early due day)"
+            android:text="總延遲時間最小化"
             android:id="@+id/radioButton" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="The Least DelayedWork"
+            android:text="達成工作數最大化"
             android:id="@+id/radioButton2" />
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="The Least Delay Hour"
+            android:text="延遲最長事件之延遲時間最小化"
             android:id="@+id/radioButton3" />
 
         <LinearLayout

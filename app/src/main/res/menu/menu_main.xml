@@ -29,7 +29,7 @@
     </item>
     <item
         android:id="@+id/Sort_Event"
-        android:icon = "@drawable/icon"
+        android:icon = "@drawable/sort_red"
         app:showAsAction="always"
         android:title = "SortEvent">
     </item>

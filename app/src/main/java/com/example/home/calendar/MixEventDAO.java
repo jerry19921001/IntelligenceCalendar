@@ -844,7 +844,7 @@ public class MixEventDAO {
                     }
                 }
             }
-            Time.set(Calendar.HOUR_OF_DAY, 0);
+            Time.add(Calendar.HOUR_OF_DAY, 1);
             for (int k = 0; k < WaitForSchedule.size(); k++) {
                 Event event = WaitForSchedule.get(k);
                 Calendar now = Calendar.getInstance();
@@ -855,6 +855,7 @@ public class MixEventDAO {
                     }
                     Time.add(Calendar.HOUR_OF_DAY, 1);
                 }
+                Time.add(Calendar.HOUR_OF_DAY, -6);
                 WaitForSchedule.get(k).setPriority((double) WaitForSchedule.get(k).getTotalTime() / WaitForSchedule.get(k).getDoHours());
             }
         }
